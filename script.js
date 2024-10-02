@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultFailureDiv = document.getElementById('resultFailure');
     const resultDescriptionDiv = document.getElementById('resultDescription');
     const scoreDiv = document.getElementById('score');
+    const tableDiv = document.getElementById('table');
+    const tableKeyDiv = document.getElementById('tableKey');
     const buttonSurrenderHit = document.getElementById('buttonSurrenderHit');
     const buttonSurrenderStand = document.getElementById('buttonSurrenderStand');
     const buttonSurrenderSplit = document.getElementById('buttonSurrenderSplit');
@@ -236,6 +238,67 @@ document.addEventListener('DOMContentLoaded', () => {
         return generateHand();
     }
 
+    function addCardValues(cards) {
+        return cardIndexes[cards[0]] + 2 + cardIndexes[cards[1]] + 2;
+    }
+
+    function convertRuleRowToTableRow(cards, ruleRow) {
+        let i = 0;
+        return '<tr>'
+            + '<td>' + cards + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
+            + '<td>' + ruleRow[i++] + ruleRow[i] + '</td>'
+        + '</tr>';
+    }
+
+    function showTable() {
+        let splitHands = '';
+        let softHands = '';
+        let hardHandsMap = new Map();
+        const map = Object.entries(TABLE_6D_H17_SUR_DAS_nADV);
+        for (const [cards, ruleRow] of map) {
+            if (cards[0] === cards[1]) {
+                splitHands += convertRuleRowToTableRow(cards, ruleRow);
+            } else {
+                if (cards[1] === 'A') {
+                    softHands += convertRuleRowToTableRow(cards, ruleRow);
+                } else {
+                    let sum = addCardValues(cards);
+                    if (!hardHandsMap.has(sum)) {
+                        hardHandsMap.set(sum, convertRuleRowToTableRow(sum, ruleRow));
+                    }
+                }
+            }
+        }
+
+        let hardHands = '';
+        for (let i = 0; i < 21; i++) {
+            if (hardHandsMap.has(i)) {
+                hardHands += hardHandsMap.get(i);
+            }
+        }
+        tableDiv.innerHTML = '<table><tr><td>SPLIT HANDS</td></tr>' + splitHands
+        + '<tr><td>SOFT HANDS</td></tr>' + softHands
+        + '<tdr><td>HARD HANDS</td></tr>' + hardHands + '</table>';
+    }
+
+    function showTableKey() {
+        const tableKey = Object.entries(actionNamesByActionCode);
+        let table = '<table>';
+        for (let [code, meaning] of tableKey) {
+            table += '<tr><td>>' + code + '</td><td>' + meaning + '</td></tr>';
+        }
+        tableKeyDiv.innerHTML = table + '</table>';
+    }
+
     function showScore() {
         const totalPlays = numCorrect + numAlmostCorrect + numIncorrect;
         let percentCorrect = 0;
@@ -352,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         deal();
         showScore();
+        showTable();
     }
 
 // hook up the buttons to actions
@@ -377,6 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize with a random hand
     deal();
+
     showScore();
-})
-;
+    showTable();
+    showTableKey();
+});
