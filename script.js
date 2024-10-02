@@ -80,6 +80,19 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': 'Surrender (or split)'
     };
 
+    const codeColors = {
+        'H ': 'lime',
+        'S ': 'red',
+        'Ph': 'yellow',
+        'Ps': 'yellow',
+        'Pd': 'yellow',
+        'Dh': 'cyan',
+        'Ds': 'cyan',
+        'Uh': 'white',
+        'Us': 'white',
+        'Up': 'white'
+    };
+
     const TABLE_6D_H17_SUR_DAS_nADV = {
         '22': 'PhPhPhPhPhPhH H H H ',
         '23': 'H H H H H H H H H H ',
@@ -242,21 +255,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return cardIndexes[cards[0]] + 2 + cardIndexes[cards[1]] + 2;
     }
 
+    function getCellColor(code) {
+        return ' background-color: ' + codeColors[code] + '; color: black;'
+    }
+
     function convertRuleRowToTableRow(cards, ruleRow) {
-        let i = 0;
-        return '<tr>'
-            + '<td>' + cards + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i++] + '</td>'
-            + '<td>' + ruleRow[i++] + ruleRow[i] + '</td>'
-        + '</tr>';
+        let result = '<tr><td>' + cards + '</td>';
+        for (let i = 0; i < ruleRow.length; i+= 2) {
+            const code = ruleRow[i] + ruleRow[i+1];
+            result += '<td style="' + getCellColor(code) + '">' + code + '</td>'
+        }
+        return result + '</tr>';
     }
 
     function showTable() {
@@ -285,16 +294,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 hardHands += hardHandsMap.get(i);
             }
         }
-        tableDiv.innerHTML = '<table><tr><td>SPLIT HANDS</td></tr>' + splitHands
-        + '<tr><td>SOFT HANDS</td></tr>' + softHands
-        + '<tdr><td>HARD HANDS</td></tr>' + hardHands + '</table>';
+        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td></tr>' + splitHands
+        + '<tr><td style="text-align: left;">SOFT HANDS</td></tr>' + softHands
+        + '<tdr><td style="text-align: left;">HARD HANDS</td></tr>' + hardHands + '</table>';
     }
 
     function showTableKey() {
         const tableKey = Object.entries(actionNamesByActionCode);
-        let table = '<table>';
+        let table = '<table border="1">';
         for (let [code, meaning] of tableKey) {
-            table += '<tr><td>>' + code + '</td><td>' + meaning + '</td></tr>';
+            table += '<tr>'
+                + '<td style="text-align: left;' + getCellColor(code) + '">' + code + '</td>'
+                + '<td style="text-align: left;">' + meaning + '</td>'
+                + '</tr>';
         }
         tableKeyDiv.innerHTML = table + '</table>';
     }
@@ -330,7 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isTricky) {
                 useThisHand = true;
             } else {
-                console.log('Skipping easy hand: ' + playerCards[0] + ' ' + playerCards[1] + ' versus ' + dealerCard);
                 useThisHand = Math.random() < 0.15;
             }
         }
