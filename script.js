@@ -81,16 +81,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const codeColors = {
-        'H ': 'lime',
-        'S ': 'red',
-        'Ph': 'yellow',
-        'Ps': 'yellow',
-        'Pd': 'yellow',
-        'Dh': 'cyan',
-        'Ds': 'cyan',
-        'Uh': 'white',
-        'Us': 'white',
-        'Up': 'white'
+        'H ': '#28b463',
+        'S ': '#e74c3c',
+        'Ph': '#f9e79f',
+        'Ps': '#f4d03f',
+        'Pd': '#d4ac0d',
+        'Dh': '#85c1e9',
+        'Ds': '#5dade2',
+        'Uh': '#e5e7e9',
+        'Us': '#bdc3c7',
+        'Up': '#85929e'
     };
 
     const TABLE_6D_H17_SUR_DAS_nADV = {
@@ -294,9 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 hardHands += hardHandsMap.get(i);
             }
         }
-        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td></tr>' + splitHands
-        + '<tr><td style="text-align: left;">SOFT HANDS</td></tr>' + softHands
-        + '<tdr><td style="text-align: left;">HARD HANDS</td></tr>' + hardHands + '</table>';
+        const dealerCards = '<td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>A</td>';
+        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCards + '</tr>' + splitHands
+        + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCards + '</tr>' + softHands
+        + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCards + '</tr>' + hardHands + '</table>';
     }
 
     function showTableKey() {
@@ -424,18 +425,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
             }
         }
-        deal();
         showScore();
         showTable();
+        deal();
     }
 
-// hook up the buttons to actions
     actions.forEach(action => {
         const button = document.getElementById(action);
         button.addEventListener('click', () => handleAction(action));
     });
 
-// Disable the surrender buttons if the table doesn't allow surrender.
     surrenderSelect.addEventListener('change', () => {
         buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
         buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
@@ -445,15 +444,12 @@ document.addEventListener('DOMContentLoaded', () => {
     buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
     buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
 
-// Don't show the answer box initially.
     resultSuccessDiv.style.display = "none";
     resultCloseDiv.style.display = "none";
     resultFailureDiv.style.display = "none";
 
-// Initialize with a random hand
-    deal();
-
     showScore();
     showTable();
     showTableKey();
+    deal();
 });
