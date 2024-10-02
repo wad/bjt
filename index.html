@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Trainer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>Blackjack Trainer</h1>
+<div id="game">
+    <div id="dealer-card-text" hidden=""></div>
+    <div id="player-card-1-text" hidden=""></div>
+    <div id="player-card-2-text" hidden=""></div>
+    <div>Dealer card:</div>
+    <div id="dealer-card"></div>
+    <div><br></div>
+    <div>One of your pairs of cards:</div>
+    <div class="container">
+        <div id="player-card-1" class="player-card"></div>
+        <div id="player-card-2" class="player-card"></div>
+    </div>
+    <div>
+        <hr>
+    </div>
+    <div>
+        <div>
+            <button id="buttonHit">Hit</button>
+            <button id="buttonStand">Stand</button>
+        </div>
+        <div>
+            <button id="buttonSplitHit">Split (or hit)</button>
+            <button id="buttonSplitStand">Split (or stand)</button>
+            <button id="buttonSplitDoubleHit">Split (or double down (or hit))</button>
+        </div>
+        <div>
+            <button id="buttonDoubleHit">Double Down (or hit)</button>
+            <button id="buttonDoubleStand">Double Down (or stand)</button>
+        </div>
+        <div>
+            <button id="buttonSurrenderHit">Surrender (or hit)</button>
+            <button id="buttonSurrenderStand">Surrender (or stand)</button>
+            <button id="buttonSurrenderSplit">Surrender (or split)</button>
+        </div>
+        <p class="small-text"><i>(Why the weird button options?
+            Your card pair may be only part of your hand,
+            such as after several splits, which make the primary play unavailable.)</i></p>
+    </div>
+    <div>
+        <hr>
+        <div id="resultSuccess"></div>
+        <div id="resultClose"></div>
+        <div id="resultFailure"></div>
+        <br>
+        <div id="resultDescription"></div>
+    </div>
+    <div>
+        <hr>
+    </div>
+    <div id="score"></div>
+    <div>
+        <hr>
+    </div>
+    <div>
+        <label for="decks">Number of Decks:</label>
+        <select id="decks">
+            <option value="6">6 (default)</option>
+            <!--            <option value="1">1</option>-->
+            <!--            <option value="2">2</option>-->
+            <!--            <option value="4">4</option>-->
+            <!--            <option value="8">8</option>-->
+        </select>
+    </div>
+    <div>
+        <label for="soft17">Soft 17 Rule (S17, dealer stands on soft-17, is best):</label>
+        <select id="soft17">
+            <option value="H17">H17 (default, dealer hits on ace and six)</option>
+            <!--            <option value="S17">S17</option>-->
+        </select>
+    </div>
+    <div>
+        <label for="surrenderPermitted">Surrender Permitted (preferred):</label>
+        <select id="surrenderPermitted">
+            <option value="yes">Yes (default)</option>
+            <!--            <option value="no">No</option>-->
+        </select>
+    </div>
+    <div>
+        <label for="doubleAfterSplitPermitted">Double After Split Permitted (preferred):</label>
+        <select id="doubleAfterSplitPermitted">
+            <option value="yes">Yes (default)</option>
+            <!--            <option value="no">No</option>-->
+        </select>
+    </div>
+    <div>
+        <label for="advantageHeld">Player has advantage:</label>
+        <select id="advantageHeld">
+            <option value="no">No, or unknown (default)</option>
+            <!--            <option value="yes">Yes</option>-->
+        </select>
+    </div>
+</div>
+<p>Based on the actual math behind <a href="https://en.wikipedia.org/wiki/Blackjack#Basic_strategy">Basic Strategy</a>.
+</p>
+<script src="script.js"></script>
+</body>
+</html>
