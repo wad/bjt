@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const advantageSelect = document.getElementById('advantageHeld');
 
     const suites = ['S', 'H', 'D', 'C'];
-    const cardsPerSuite = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const cardsForRandom = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
+    const cardsValuedTen = ['10', 'J', 'Q', 'K'];
 
     const cardIndexes = {
         '2': 0,
@@ -216,8 +217,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'cards/' + card + suite + '.png';
     }
 
+    // The odds of getting a value-ten card (10, Jack, Queen, King) are the same as the odds of getting any other card.
     function getRandomCard() {
-        return cardsPerSuite[Math.floor(Math.random() * cardsPerSuite.length)];
+        let card = cardsForRandom[Math.floor(Math.random() * cardsForRandom.length)];
+        if (card === 'X') {
+            card = cardsValuedTen[Math.floor(Math.random() * cardsValuedTen.length)];
+        }
+        return card;
     }
 
     function sortHand(hand) {
