@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const advantageSelect = document.getElementById('advantageHeld');
 
     const suites = ['S', 'H', 'D', 'C'];
+    const cardsPerSuite = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-    const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     const cardIndexes = {
         '2': 0,
         '3': 1,
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'AA': 'PhPhPsPsPdPhPhPhPhPh'
     };
 
-    const TABLE_IS_TRICKY = {
+    const trickyPlays = {
         '22': '1111111111',
         '23': '0000000000',
         '24': '0000000000',
@@ -211,16 +211,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
 
-    function getCardFilename(card) {
+    function getCardImageFilename(card) {
         const suite = suites[Math.floor(Math.random() * suites.length)];
         return 'cards/' + card + suite + '.png';
     }
 
     function getRandomCard() {
-        return cards[Math.floor(Math.random() * cards.length)];
+        return cardsPerSuite[Math.floor(Math.random() * cardsPerSuite.length)];
     }
 
-    function removeFaceCards(card) {
+    function sortHand(hand) {
+        if (cardIndexes[hand[0]] > cardIndexes[hand[1]]) {
+            return [hand[1], hand[0]];
+        }
+        return hand;
+    }
+
+    function standardizeCard(card) {
         switch (card) {
             case '10':
             case 'J':
@@ -231,16 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
-    function sortCards(cards) {
-        if (cardIndexes[cards[0]] > cardIndexes[cards[1]]) {
-            return [cards[1], cards[0]];
-        }
-        return cards;
+    function standardizeHand(hand) {
+        return sortHand([standardizeCard(hand[0]), standardizeCard(hand[1])]);
+    }
+
+    function getTableLookupForHand(hand) {
+        const standardizedHand = standardizeHand(hand);
+        return standardizedHand[0] + standardizedHand[1];
     }
 
     function isBlackjack(hand) {
-        const simplified = sortCards([removeFaceCards(hand[0]), removeFaceCards(hand[1])]);
-        return simplified[0] === 'X' && simplified[1] === 'A';
+        const standardizedHand = standardizeHand(hand);
+        return standardizedHand[0] === 'X' && standardizedHand[1] === 'A';
     }
 
     function generateHand() {
@@ -251,19 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return generateHand();
     }
 
-    function addCardValues(cards) {
-        return cardIndexes[cards[0]] + 2 + cardIndexes[cards[1]] + 2;
+    function addCardValues(hand) {
+        const cardValueOfDeuce = 2;
+        return cardIndexes[hand[0]] + cardValueOfDeuce + cardIndexes[hand[1]] + cardValueOfDeuce;
     }
 
-    function getCellColor(code) {
-        return ' background-color: ' + codeColors[code] + '; color: black;'
+    function getCellColor(actionCode) {
+        return ' background-color: ' + codeColors[actionCode] + '; color: black;'
     }
 
-    function convertRuleRowToTableRow(cards, ruleRow) {
-        let result = '<tr><td>' + cards + '</td>';
-        for (let i = 0; i < ruleRow.length; i+= 2) {
-            const code = ruleRow[i] + ruleRow[i+1];
-            result += '<td style="' + getCellColor(code) + '">' + code + '</td>'
+    function convertRuleRowToTableRow(simplifiedHand, ruleRow) {
+        let result = '<tr><td>' + simplifiedHand + '</td>';
+        for (let i = 0; i < ruleRow.length; i += 2) {
+            const actionCode = ruleRow[i] + ruleRow[i + 1];
+            result += '<td style="' + getCellColor(actionCode) + '">' + actionCode + '</td>'
         }
         return result + '</tr>';
     }
@@ -273,14 +283,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let softHands = '';
         let hardHandsMap = new Map();
         const map = Object.entries(TABLE_6D_H17_SUR_DAS_nADV);
-        for (const [cards, ruleRow] of map) {
-            if (cards[0] === cards[1]) {
-                splitHands += convertRuleRowToTableRow(cards, ruleRow);
+        for (const [simplifiedHand, ruleRow] of map) {
+            if (simplifiedHand[0] === simplifiedHand[1]) {
+                splitHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
             } else {
-                if (cards[1] === 'A') {
-                    softHands += convertRuleRowToTableRow(cards, ruleRow);
+                if (simplifiedHand[1] === 'A') {
+                    softHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
                 } else {
-                    let sum = addCardValues(cards);
+                    let sum = addCardValues(simplifiedHand);
                     if (!hardHandsMap.has(sum)) {
                         hardHandsMap.set(sum, convertRuleRowToTableRow(sum, ruleRow));
                     }
@@ -294,19 +304,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 hardHands += hardHandsMap.get(i);
             }
         }
-        const dealerCards = '<td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>A</td>';
-        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCards + '</tr>' + splitHands
-        + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCards + '</tr>' + softHands
-        + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCards + '</tr>' + hardHands + '</table>';
+        const dealerCardHeader = '<td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>A</td>';
+        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHands
+            + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHands
+            + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHands + '</table>';
     }
 
     function showTableKey() {
         const tableKey = Object.entries(actionNamesByActionCode);
         let table = '<table border="1">';
-        for (let [code, meaning] of tableKey) {
+        for (let [actionCode, actionCodeMeaning] of tableKey) {
             table += '<tr>'
-                + '<td style="text-align: left;' + getCellColor(code) + '">' + code + '</td>'
-                + '<td style="text-align: left;">' + meaning + '</td>'
+                + '<td style="text-align: left;' + getCellColor(actionCode) + '">' + actionCode + '</td>'
+                + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
                 + '</tr>';
         }
         tableKeyDiv.innerHTML = table + '</table>';
@@ -324,60 +334,91 @@ document.addEventListener('DOMContentLoaded', () => {
             + '<br>Incorrect plays: ' + numIncorrect;
     }
 
-    function isTrickyHand(dealerCard, hand) {
-        const simplified = sortCards([removeFaceCards(hand[0]), removeFaceCards(hand[1])]);
-        const cardLookup = simplified[0] + simplified[1];
-        const ruleRow = TABLE_IS_TRICKY[cardLookup];
-        return ruleRow[cardIndexes[removeFaceCards(dealerCard)]] === '1';
+    function isTrickyPlay(dealerCard, hand) {
+        const simplifiedHand = sortHand([standardizeCard(hand[0]), standardizeCard(hand[1])]);
+        const cardLookup = simplifiedHand[0] + simplifiedHand[1];
+        const ruleRow = trickyPlays[cardLookup];
+        return ruleRow[cardIndexes[standardizeCard(dealerCard)]] === '1';
     }
 
     function deal() {
         let dealerCard = getRandomCard();
-        let playerCards = generateHand();
-        let isTricky = isTrickyHand(dealerCard, playerCards);
-        let useThisHand = isTricky;
-        while (!useThisHand) {
+        let hand = generateHand();
+        let useTheseCards = isTrickyPlay(dealerCard, hand);
+        while (!useTheseCards) {
             dealerCard = getRandomCard();
-            playerCards = generateHand();
-            isTricky = isTrickyHand(dealerCard, playerCards);
-            if (isTricky) {
-                useThisHand = true;
-            } else {
-                useThisHand = Math.random() < 0.15;
-            }
+            hand = generateHand();
+            useTheseCards = isTrickyPlay(dealerCard, hand) || Math.random() < 0.15;
         }
 
-        dealerCardDiv.innerHTML = '<img src="' + getCardFilename(dealerCard) + '" alt="' + dealerCard + '" width="100">';
+        dealerCardDiv.innerHTML = '<img src="' + getCardImageFilename(dealerCard) + '" alt="' + dealerCard + '" width="100">';
         dealerCardTextDiv.innerText = dealerCard;
-        playerCard1Div.innerHTML = '<img src="' + getCardFilename(playerCards[0]) + '" alt="' + playerCards[0] + '" width="100">';
-        playerCard1TextDiv.innerText = playerCards[0];
-        playerCard2Div.innerHTML = '<img src="' + getCardFilename(playerCards[1]) + '" alt="' + playerCards[1] + '" width="100">';
-        playerCard2TextDiv.innerText = playerCards[1];
+        playerCard1Div.innerHTML = '<img src="' + getCardImageFilename(hand[0]) + '" alt="' + hand[0] + '" width="100">';
+        playerCard1TextDiv.innerText = hand[0];
+        playerCard2Div.innerHTML = '<img src="' + getCardImageFilename(hand[1]) + '" alt="' + hand[1] + '" width="100">';
+        playerCard2TextDiv.innerText = hand[1];
     }
 
     function getCorrectPlayCode(ruleRow, dealerCard) {
-        const i = cardIndexes[removeFaceCards(dealerCard)] * 2;
+        const i = cardIndexes[standardizeCard(dealerCard)] * 2;
         return ruleRow[i] + ruleRow[i + 1];
     }
 
     function lookupCorrectPlayCode(
         dealerCard,
-        playerCards,
+        hand,
         decks,
         soft17,
         surrenderAllowed,
         dasAllowed,
         hasAdvantage) {
-        const sortedPlayerCards = sortCards([
-            removeFaceCards(playerCards[0]),
-            removeFaceCards(playerCards[1])]);
-        const cardLookup = sortedPlayerCards[0] + sortedPlayerCards[1];
-        const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[cardLookup];
+        const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[getTableLookupForHand(hand)];
         return getCorrectPlayCode(ruleRow, dealerCard);
     }
 
-    function isClose(chosenPlay, correctPlay) {
+    function wasPlayAlmostCorrect(chosenPlay, correctPlay) {
         return chosenPlay[0] === correctPlay[0];
+    }
+
+    function playWasCorrect(chosenAction) {
+        numCorrect++;
+        resultFailureDiv.innerText = "";
+        resultFailureDiv.style.display = "none";
+        resultCloseDiv.innerText = "";
+        resultCloseDiv.style.display = "none";
+        resultSuccessDiv.style.display = "";
+        resultSuccessDiv.innerText = "Correct";
+        resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+            + ' versus ' + dealerCardTextDiv.textContent
+            + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
+    }
+
+    function playWasAlmostCorrect(chosenAction, correctPlayCode) {
+        numAlmostCorrect++;
+        resultSuccessDiv.innerText = "";
+        resultSuccessDiv.style.display = "none";
+        resultFailureDiv.innerText = "";
+        resultFailureDiv.style.display = "none";
+        resultCloseDiv.style.display = "";
+        resultCloseDiv.innerText = "Almost correct!";
+        resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+            + ' versus ' + dealerCardTextDiv.textContent
+            + ', you chose "' + actionNamesByActionCode[chosenAction]
+            + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+    }
+
+    function playWasIncorrect(chosenAction, correctPlayCode) {
+        numIncorrect++;
+        resultSuccessDiv.innerText = "";
+        resultSuccessDiv.style.display = "none";
+        resultCloseDiv.innerText = "";
+        resultCloseDiv.style.display = "none";
+        resultFailureDiv.style.display = "";
+        resultFailureDiv.innerText = "Wrong play";
+        resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+            + ' versus ' + dealerCardTextDiv.textContent
+            + ', you chose "' + actionNamesByActionCode[chosenAction]
+            + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
     }
 
     function handleAction(action) {
@@ -391,38 +432,12 @@ document.addEventListener('DOMContentLoaded', () => {
             advantageSelect.value === 'yes');
         const chosenAction = actionCodesByAction[action];
         if (chosenAction === correctPlayCode) {
-            numCorrect++;
-            resultFailureDiv.innerText = "";
-            resultFailureDiv.style.display = "none";
-            resultCloseDiv.innerText = "";
-            resultCloseDiv.style.display = "none";
-            resultSuccessDiv.style.display = "";
-            resultSuccessDiv.innerText = "Correct";
-            resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent + ' versus ' + dealerCardTextDiv.textContent
-                + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
+            playWasCorrect(chosenAction);
         } else {
-            if (isClose(chosenAction, correctPlayCode)) {
-                numAlmostCorrect++;
-                resultSuccessDiv.innerText = "";
-                resultSuccessDiv.style.display = "none";
-                resultFailureDiv.innerText = "";
-                resultFailureDiv.style.display = "none";
-                resultCloseDiv.style.display = "";
-                resultCloseDiv.innerText = "Almost correct!";
-                resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent + ' versus ' + dealerCardTextDiv.textContent
-                    + ', you chose "' + actionNamesByActionCode[chosenAction]
-                    + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode)) {
+                playWasAlmostCorrect(chosenAction, correctPlayCode);
             } else {
-                numIncorrect++;
-                resultSuccessDiv.innerText = "";
-                resultSuccessDiv.style.display = "none";
-                resultCloseDiv.innerText = "";
-                resultCloseDiv.style.display = "none";
-                resultFailureDiv.style.display = "";
-                resultFailureDiv.innerText = "Wrong play";
-                resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent + ' versus ' + dealerCardTextDiv.textContent
-                    + ', you chose "' + actionNamesByActionCode[chosenAction]
-                    + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+                playWasIncorrect(chosenAction, correctPlayCode);
             }
         }
         showScore();
