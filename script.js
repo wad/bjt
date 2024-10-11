@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableKeyDiv = document.getElementById('tableKey');
     const decksSelect = document.getElementById('decks');
     const soft17Select = document.getElementById('soft17');
-    const surrenderSelect = document.getElementById('surrenderPermitted');
-    const dasSelect = document.getElementById('doubleAfterSplitPermitted');
-    const hardModeSelect = document.getElementById('hardMode');
+    const surrenderPermittedCheckbox = document.getElementById('surrenderPermitted');
+    const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
+    const hardModeCheckbox = document.getElementById('hardMode');
 
     const suites = ['S', 'H', 'D', 'C'];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
@@ -353,14 +353,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function selectSituation() {
+    function selectSituation(isHardMode) {
         const situationsEntries = Object.entries(situations);
         const availableSituations = [];
-        let numTimesToInclude = 0;
         for (let [handCards, frequenciesByDealerCard] of situationsEntries) {
             for (let dealerCardIndex = 0; dealerCardIndex < frequenciesByDealerCard.length; dealerCardIndex++) {
                 const situation = handCards + cards[dealerCardIndex];
-                numTimesToInclude = determineFrequencyOfSituation(frequenciesByDealerCard[dealerCardIndex]);
+                const numTimesToInclude = isHardMode
+                    ? determineFrequencyOfSituation(frequenciesByDealerCard[dealerCardIndex])
+                    : 1;
                 for (let i = 0; i < numTimesToInclude; i++) {
                     availableSituations.push(situation);
                 }
@@ -373,8 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function deal() {
-        const selectedSituation = selectSituation();
+    function deal(isHardMode) {
+        const selectedSituation = selectSituation(isHardMode);
 
         dealerCardDiv.innerHTML = '<img src="' + getCardImageFilename(
             selectedSituation.dealerCard) + '" alt="' + selectedSituation.dealerCard + '" width="100">';
@@ -398,8 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         decks,
         soft17,
         surrenderAllowed,
-        dasAllowed,
-        hardMode) {
+        dasAllowed) {
         const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[hand[0] + hand[1]];
         return getCorrectPlayCode(ruleRow, dealerCard);
     }
@@ -446,15 +446,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleAction(action) {
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
+        const isHardMode = hardModeCheckbox.checked;
 
         const correctPlayCode = lookupCorrectPlayCode(
             dealerCard,
             hand,
             decksSelect.value,
             soft17Select.value,
-            surrenderSelect.value === 'checked',
-            dasSelect.value === 'checked',
-            hardModeSelect.value === 'checked');
+            surrenderPermittedCheckbox.checked,
+            dasPermittedCheckbox.checked);
         const chosenAction = actionCodesByAction[action];
         if (chosenAction === correctPlayCode) {
             playWasCorrect(chosenAction);
@@ -468,24 +468,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showScore();
         showTable();
-        deal();
+        deal(isHardMode);
+    }
+
+    function handleOptionChanged(event) {
+        const element = event.target;
+        if (element.tagName === 'INPUT' && element.type === 'checkbox') {
+            switch (element.name) {
+                case 'surrenderPermitted':
+                    break;
+                case 'doubleAfterSplitPermitted':
+                    break;
+                case 'hardMode':
+                    deal(element.checked);
+                    break;
+            }
+        } else if (element.tagName === 'SELECT') {
+            const elementValue = element.value;
+            switch (element.name) {
+                case 'decks':
+                    console.log("decks: " + elementValue);
+                    break;
+                case 'soft17':
+                    console.log("S17: " + elementValue);
+                    break;
+            }
+        }
     }
 
     function initialSetup() {
+
+        // Clear out anything in the play result area
+        updatePlayResult(false, false, false);
+
+        // button event handlers
         actions.forEach(action => {
             const button = document.getElementById(action);
             button.style.backgroundColor = codeColors[actionCodesByAction[action]];
             button.addEventListener('click', () => handleAction(action));
         });
 
-        resultSuccessDiv.style.display = "none";
-        resultCloseDiv.style.display = "none";
-        resultFailureDiv.style.display = "none";
+        // options event handlers
+        decksSelect.addEventListener('change', handleOptionChanged);
+        soft17Select.addEventListener('change', handleOptionChanged);
+        surrenderPermittedCheckbox.addEventListener('change', handleOptionChanged);
+        dasPermittedCheckbox.addEventListener('change', handleOptionChanged);
+        hardModeCheckbox.addEventListener('change', handleOptionChanged);
 
         showScore();
         showTable();
         showTableKey();
-        deal();
+        deal(hardModeCheckbox.checked);
     }
 
     initialSetup();
