@@ -348,27 +348,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function determineFrequencyOfSituation(dealerCardFrequencyCode) {
+        switch (dealerCardFrequencyCode) {
+            case '$':
+                return getRandomInteger(4) === 0 ? 1 : 0;
+            case '#':
+                return getRandomInteger(3) === 0 ? 1 : 0;
+            case '@':
+                return getRandomInteger(2) === 0 ? 1 : 0;
+            default:
+                return dealerCardFrequencyCode;
+        }
+    }
+
     function selectSituation() {
         const situationsEntries = Object.entries(situations);
         const availableSituations = [];
         let numTimesToInclude = 0;
         for (let [handCards, frequenciesByDealerCard] of situationsEntries) {
             for (let dealerCardIndex = 0; dealerCardIndex < frequenciesByDealerCard.length; dealerCardIndex++) {
-                const dealerCardFrequency = frequenciesByDealerCard[dealerCardIndex];
-                switch (dealerCardFrequency) {
-                    case '$':
-                        numTimesToInclude = getRandomInteger(4) === 0 ? 1 : 0;
-                        break;
-                    case '#':
-                        numTimesToInclude = getRandomInteger(3) === 0 ? 1 : 0;
-                        break;
-                    case '@':
-                        numTimesToInclude = getRandomInteger(2) === 0 ? 1 : 0;
-                        break;
-                    default:
-                        numTimesToInclude = dealerCardFrequency;
-                }
                 const situation = handCards + cards[dealerCardIndex];
+                numTimesToInclude = determineFrequencyOfSituation(frequenciesByDealerCard[dealerCardIndex]);
                 for (let i = 0; i < numTimesToInclude; i++) {
                     availableSituations.push(situation);
                 }
