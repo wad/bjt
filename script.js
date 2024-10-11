@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const advantageSelect = document.getElementById('advantageHeld');
 
     const suites = ['S', 'H', 'D', 'C'];
-    const cardsForRandom = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
+    const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
     const cardsValuedTen = ['10', 'J', 'Q', 'K'];
 
     const cardIndexes = {
@@ -151,79 +151,85 @@ document.addEventListener('DOMContentLoaded', () => {
         'AA': 'PhPhPsPsPdPhPhPhPhPh'
     };
 
-    const trickyPlays = {
-        '22': '1111111111',
-        '23': '0000000000',
-        '24': '0000000000',
-        '25': '0000000000',
-        '26': '1111100000',
-        '27': '1111100000',
-        '28': '1111111111',
-        '29': '0000000000',
-        '2X': '1111111111',
-        '2A': '1111111111',
-        '33': '1111111111',
-        '34': '0000000000',
-        '35': '0000000000',
-        '36': '1111100000',
-        '37': '1111111111',
-        '38': '1111111111',
-        '39': '1111111111',
-        '3X': '0000000000',
-        '3A': '1111111111',
-        '44': '1111111111',
-        '45': '1111100000',
-        '46': '1111111111',
-        '47': '0000000000',
-        '48': '1111100000',
-        '49': '0000000000',
-        '4X': '0000000000',
-        '4A': '1111111111',
-        '55': '1111111111',
-        '56': '0000000000',
-        '57': '1111111111',
-        '58': '0000000000',
-        '59': '0000000000',
-        '5X': '0000011111',
-        '5A': '1111111111',
-        '66': '1111111111',
-        '67': '0000000000',
-        '68': '0000000000',
-        '69': '0000011111',
-        '6X': '0000011111',
-        '6A': '1111111111',
-        '77': '1111111111',
-        '78': '0000011111',
-        '79': '0000011111',
-        '7X': '0000000111',
-        '7A': '1111111111',
-        '88': '1111111111',
-        '89': '0000000111',
-        '8X': '0000000000',
-        '8A': '1111111111',
-        '99': '1111111111',
-        '9X': '0000000000',
-        '9A': '1111111111',
-        'XX': '0000000000',
-        'AA': '1111111111'
+    // The position in each string corresponds to the dealer card.
+    // The value of each number in each string corresponds to the probability that
+    // this card combination will be presented.
+    // The '@' symbol means it has a 1/2 chance of being included in the selection.
+    // The '#' symbol means it has a 1/3 chance of being included in the selection.
+    // The '$' symbol means it has a 1/4 chance of being included in the selection.
+    // (Why this @#$ thing? Otherwise, hard hands are overrepresented.)
+    // 5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 <--- hard hands
+    // 1  1  2  2  3  3  4  4  4  3  3  2  2  1  1  1 <--- hard hand frequency
+    // 1  1  @  @  #  #  $  $  $  #  #  @  @  1  1  1 <--- symbol to use for baseline
+    const situations = {
+        '22': '4444674444',
+        '23': '1111111111', // 5
+        '24': '1111111111', // 6
+        '25': '@@@@@@@@@@', // 7
+        '26': '@@@11@@@@@', // 8
+        '27': '33333#####', // 9
+        '28': '@@@@@@@@@@', // 10
+        '29': '@@@@@@@@@@', // 11
+        '2X': '11@@@$$$$$', // 12
+        '2A': '4455533333',
+        '33': '4444674444',
+        '34': '@@@@@@@@@@', // 7
+        '35': '@@@11@@@@@', // 8
+        '36': '33333#####', // 9
+        '37': '@@@@@@@@@@', // 10
+        '38': '@@@@@@@@@@', // 11
+        '39': '11@@@$$$$$', // 12
+        '3X': '##########', // 13
+        '3A': '4455533333',
+        '44': '5556666444',
+        '45': '33333#####', // 9
+        '46': '@@@@@@@@@@', // 10
+        '47': '@@@@@@@@@@', // 11
+        '48': '11@@@$$$$$', // 12
+        '49': '##########', // 13
+        '4X': '@@@@@@@@@@', // 14
+        '4A': '3555533333',
+        '55': '2222222222',
+        '56': '@@@@@@@@@@', // 11
+        '57': '11@@@$$$$$', // 12
+        '58': '##########', // 13
+        '59': '@@@@@@@@@@', // 14
+        '5X': '#######111', // 15
+        '5A': '3555333333',
+        '66': '7777754444',
+        '67': '##########', // 13
+        '68': '@@@@@@@@@@', // 14
+        '69': '#######111', // 15
+        '6X': '@@@@@@@111', // 16
+        '6A': '4444433333',
+        '77': '4444794444',
+        '78': '#######111', // 15
+        '79': '@@@@@@@111', // 16
+        '7X': '@@@@@@@@@2', // 17
+        '7A': '5555555333',
+        '88': '4444444446',
+        '89': '@@@@@@@@@2', // 17
+        '8X': '1111111111', // 18
+        '8A': '3335933333',
+        '99': '4444496655',
+        '9X': '1111111111', // 19
+        '9A': '2222222222',
+        'XX': '1111111111', // 20
+        'AA': '4477954444'
     };
 
     let numCorrect = 0;
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
 
-    function getCardImageFilename(card) {
-        const suite = suites[Math.floor(Math.random() * suites.length)];
-        return 'cards/' + card + suite + '.png';
+    // Returns an integer >= 0 and < max
+    function getRandomInteger(max) {
+        return Math.floor(Math.random() * max);
     }
 
-    // The odds of getting a value-ten card (10, Jack, Queen, King) are the same as the odds of getting any other card.
-    function getRandomCard() {
-        let card = cardsForRandom[Math.floor(Math.random() * cardsForRandom.length)];
-        if (card === 'X') {
-            card = cardsValuedTen[Math.floor(Math.random() * cardsValuedTen.length)];
-        }
-        return card;
+    function getCardImageFilename(card) {
+        const suite = suites[getRandomInteger(suites.length)];
+        return 'cards/' + card + suite + '.png';
     }
 
     function sortHand(hand) {
@@ -251,19 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function getTableLookupForHand(hand) {
         const standardizedHand = standardizeHand(hand);
         return standardizedHand[0] + standardizedHand[1];
-    }
-
-    function isBlackjack(hand) {
-        const standardizedHand = standardizeHand(hand);
-        return standardizedHand[0] === 'X' && standardizedHand[1] === 'A';
-    }
-
-    function generateHand() {
-        const hand = [getRandomCard(), getRandomCard()];
-        if (!isBlackjack(hand)) {
-            return hand;
-        }
-        return generateHand();
     }
 
     function addCardValues(hand) {
@@ -340,29 +333,66 @@ document.addEventListener('DOMContentLoaded', () => {
             + '<br>Incorrect plays: ' + numIncorrect;
     }
 
-    function isTrickyPlay(dealerCard, hand) {
-        const simplifiedHand = sortHand([standardizeCard(hand[0]), standardizeCard(hand[1])]);
-        const cardLookup = simplifiedHand[0] + simplifiedHand[1];
-        const ruleRow = trickyPlays[cardLookup];
-        return ruleRow[cardIndexes[standardizeCard(dealerCard)]] === '1';
+    function convertCardForDisplay(card) {
+        if (card === 'X') {
+            return cardsValuedTen[getRandomInteger(cardsValuedTen.length)];
+        }
+        return card;
+    }
+
+    function convertHandForDisplay(hand) {
+        if (0 === getRandomInteger(2)) {
+            return [convertCardForDisplay(hand[0]), convertCardForDisplay(hand[1])];
+        } else {
+            return [convertCardForDisplay(hand[1]), convertCardForDisplay(hand[0])];
+        }
+    }
+
+    function selectSituation() {
+        const situationsEntries = Object.entries(situations);
+        const availableSituations = [];
+        let numTimesToInclude = 0;
+        for (let [handCards, frequenciesByDealerCard] of situationsEntries) {
+            for (let dealerCardIndex = 0; dealerCardIndex < frequenciesByDealerCard.length; dealerCardIndex++) {
+                const dealerCardFrequency = frequenciesByDealerCard[dealerCardIndex];
+                switch (dealerCardFrequency) {
+                    case '$':
+                        numTimesToInclude = getRandomInteger(4) === 0 ? 1 : 0;
+                        break;
+                    case '#':
+                        numTimesToInclude = getRandomInteger(3) === 0 ? 1 : 0;
+                        break;
+                    case '@':
+                        numTimesToInclude = getRandomInteger(2) === 0 ? 1 : 0;
+                        break;
+                    default:
+                        numTimesToInclude = dealerCardFrequency;
+                }
+                const situation = handCards + cards[dealerCardIndex];
+                for (let i = 0; i < numTimesToInclude; i++) {
+                    availableSituations.push(situation);
+                }
+            }
+        }
+        const chosenSituation = availableSituations[getRandomInteger(availableSituations.length)];
+        return {
+            hand: convertHandForDisplay(chosenSituation.substring(0, 2)),
+            dealerCard: convertCardForDisplay(chosenSituation.substring(2, 3))
+        }
     }
 
     function deal() {
-        let dealerCard = getRandomCard();
-        let hand = generateHand();
-        let useTheseCards = isTrickyPlay(dealerCard, hand);
-        while (!useTheseCards) {
-            dealerCard = getRandomCard();
-            hand = generateHand();
-            useTheseCards = isTrickyPlay(dealerCard, hand) || Math.random() < 0.15;
-        }
+        const selectedSituation = selectSituation();
 
-        dealerCardDiv.innerHTML = '<img src="' + getCardImageFilename(dealerCard) + '" alt="' + dealerCard + '" width="100">';
-        dealerCardTextDiv.innerText = dealerCard;
-        playerCard1Div.innerHTML = '<img src="' + getCardImageFilename(hand[0]) + '" alt="' + hand[0] + '" width="100">';
-        playerCard1TextDiv.innerText = hand[0];
-        playerCard2Div.innerHTML = '<img src="' + getCardImageFilename(hand[1]) + '" alt="' + hand[1] + '" width="100">';
-        playerCard2TextDiv.innerText = hand[1];
+        dealerCardDiv.innerHTML = '<img src="' + getCardImageFilename(
+            selectedSituation.dealerCard) + '" alt="' + selectedSituation.dealerCard + '" width="100">';
+        dealerCardTextDiv.innerText = selectedSituation.dealerCard;
+        playerCard1Div.innerHTML = '<img src="' + getCardImageFilename(
+            selectedSituation.hand[0]) + '" alt="' + selectedSituation.hand[0] + '" width="100">';
+        playerCard1TextDiv.innerText = selectedSituation.hand[0];
+        playerCard2Div.innerHTML = '<img src="' + getCardImageFilename(
+            selectedSituation.hand[1]) + '" alt="' + selectedSituation.hand[1] + '" width="100">';
+        playerCard2TextDiv.innerText = selectedSituation.hand[1];
     }
 
     function getCorrectPlayCode(ruleRow, dealerCard) {
