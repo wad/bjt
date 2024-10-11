@@ -254,11 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return sortHand([standardizeCard(hand[0]), standardizeCard(hand[1])]);
     }
 
-    function getTableLookupForHand(hand) {
-        const standardizedHand = standardizeHand(hand);
-        return standardizedHand[0] + standardizedHand[1];
-    }
-
     function addCardValues(hand) {
         const cardValueOfDeuce = 2;
         return cardIndexes[hand[0]] + cardValueOfDeuce + cardIndexes[hand[1]] + cardValueOfDeuce;
@@ -396,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getCorrectPlayCode(ruleRow, dealerCard) {
-        const i = cardIndexes[standardizeCard(dealerCard)] * 2;
+        const i = cardIndexes[dealerCard] * 2;
         return ruleRow[i] + ruleRow[i + 1];
     }
 
@@ -408,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
         surrenderAllowed,
         dasAllowed,
         hasAdvantage) {
-        const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[getTableLookupForHand(hand)];
+        const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[hand[0] + hand[1]];
         return getCorrectPlayCode(ruleRow, dealerCard);
     }
 
@@ -452,9 +447,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAction(action) {
+        const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
+        const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
+
         const correctPlayCode = lookupCorrectPlayCode(
-            dealerCardTextDiv.textContent,
-            [playerCard1TextDiv.textContent, playerCard2TextDiv.textContent],
+            dealerCard,
+            hand,
             decksSelect.value,
             soft17Select.value,
             surrenderSelect.value === 'yes',
@@ -470,32 +468,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 playWasIncorrect(chosenAction, correctPlayCode);
             }
         }
+
         showScore();
         showTable();
         deal();
     }
 
-    actions.forEach(action => {
-        const button = document.getElementById(action);
-        button.style.backgroundColor = codeColors[actionCodesByAction[action]];
-        button.addEventListener('click', () => handleAction(action));
-    });
+    function initialSetup() {
+        actions.forEach(action => {
+            const button = document.getElementById(action);
+            button.style.backgroundColor = codeColors[actionCodesByAction[action]];
+            button.addEventListener('click', () => handleAction(action));
+        });
 
-    surrenderSelect.addEventListener('change', () => {
+        surrenderSelect.addEventListener('change', () => {
+            buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
+            buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
+            buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
+        });
         buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
         buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
         buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
-    });
-    buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
-    buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
-    buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
 
-    resultSuccessDiv.style.display = "none";
-    resultCloseDiv.style.display = "none";
-    resultFailureDiv.style.display = "none";
+        resultSuccessDiv.style.display = "none";
+        resultCloseDiv.style.display = "none";
+        resultFailureDiv.style.display = "none";
 
-    showScore();
-    showTable();
-    showTableKey();
-    deal();
+        showScore();
+        showTable();
+        showTableKey();
+        deal();
+    }
+
+    initialSetup();
 });
