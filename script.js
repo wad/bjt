@@ -46,11 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const actions = [
         'buttonHit',
         'buttonStand',
+        'buttonDoubleHit',
+        'buttonDoubleStand',
         'buttonSplitHit',
         'buttonSplitStand',
         'buttonSplitDoubleHit',
-        'buttonDoubleHit',
-        'buttonDoubleStand',
         'buttonSurrenderHit',
         'buttonSurrenderStand',
         'buttonSurrenderSplit'];
@@ -58,11 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionCodesByAction = {
         'buttonHit': 'H ',
         'buttonStand': 'S ',
+        'buttonDoubleHit': 'Dh',
+        'buttonDoubleStand': 'Ds',
         'buttonSplitHit': 'Ph',
         'buttonSplitStand': 'Ps',
         'buttonSplitDoubleHit': 'Pd',
-        'buttonDoubleHit': 'Dh',
-        'buttonDoubleStand': 'Ds',
         'buttonSurrenderHit': 'Uh',
         'buttonSurrenderStand': 'Us',
         'buttonSurrenderSplit': 'Up'
@@ -71,11 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionNamesByActionCode = {
         'H ': 'Hit',
         'S ': 'Stand',
+        'Dh': 'Double down (or hit)',
+        'Ds': 'Double down (or stand)',
         'Ph': 'Split (or hit)',
         'Ps': 'Split (or stand)',
         'Pd': 'Split (or double down (or hit))',
-        'Dh': 'Double down (or hit)',
-        'Ds': 'Double down (or stand)',
         'Uh': 'Surrender (or hit)',
         'Us': 'Surrender (or stand)',
         'Up': 'Surrender (or split)'
@@ -84,11 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeColors = {
         'H ': '#28b463',
         'S ': '#e74c3c',
+        'Dh': '#85c1e9',
+        'Ds': '#5dade2',
         'Ph': '#f9e79f',
         'Ps': '#f4d03f',
         'Pd': '#d4ac0d',
-        'Dh': '#85c1e9',
-        'Ds': '#5dade2',
         'Uh': '#e5e7e9',
         'Us': '#bdc3c7',
         'Up': '#85929e'
@@ -453,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     actions.forEach(action => {
         const button = document.getElementById(action);
+        button.style.backgroundColor = codeColors[actionCodesByAction[action]];
         button.addEventListener('click', () => handleAction(action));
     });
 
