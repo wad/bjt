@@ -416,14 +416,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return chosenPlay[0] === correctPlay[0];
     }
 
+    function updatePlayResult(wasSuccess, wasFailure, wasClose) {
+        resultSuccessDiv.innerText = wasSuccess ? 'Correct' : '';
+        resultSuccessDiv.style.display = wasSuccess ? '' : 'none';
+        resultFailureDiv.innerText = wasFailure ? 'Wrong play' : '';
+        resultFailureDiv.style.display = wasFailure ? '' : 'none';
+        resultCloseDiv.innerText = wasClose ? 'Almost correct!' : '';
+        resultCloseDiv.style.display = wasClose ? '' : 'none';
+    }
+
     function playWasCorrect(chosenAction) {
         numCorrect++;
-        resultFailureDiv.innerText = "";
-        resultFailureDiv.style.display = "none";
-        resultCloseDiv.innerText = "";
-        resultCloseDiv.style.display = "none";
-        resultSuccessDiv.style.display = "";
-        resultSuccessDiv.innerText = "Correct";
+        updatePlayResult(true, false, false);
         resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
@@ -431,12 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playWasAlmostCorrect(chosenAction, correctPlayCode) {
         numAlmostCorrect++;
-        resultSuccessDiv.innerText = "";
-        resultSuccessDiv.style.display = "none";
-        resultFailureDiv.innerText = "";
-        resultFailureDiv.style.display = "none";
-        resultCloseDiv.style.display = "";
-        resultCloseDiv.innerText = "Almost correct!";
+        updatePlayResult(false, false, true);
         resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
@@ -445,12 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playWasIncorrect(chosenAction, correctPlayCode) {
         numIncorrect++;
-        resultSuccessDiv.innerText = "";
-        resultSuccessDiv.style.display = "none";
-        resultCloseDiv.innerText = "";
-        resultCloseDiv.style.display = "none";
-        resultFailureDiv.style.display = "";
-        resultFailureDiv.innerText = "Wrong play";
+        updatePlayResult(false, true, false);
         resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
