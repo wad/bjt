@@ -13,14 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
     const tableKeyDiv = document.getElementById('tableKey');
-    const buttonSurrenderHit = document.getElementById('buttonSurrenderHit');
-    const buttonSurrenderStand = document.getElementById('buttonSurrenderStand');
-    const buttonSurrenderSplit = document.getElementById('buttonSurrenderSplit');
     const decksSelect = document.getElementById('decks');
     const soft17Select = document.getElementById('soft17');
     const surrenderSelect = document.getElementById('surrenderPermitted');
     const dasSelect = document.getElementById('doubleAfterSplitPermitted');
-    const advantageSelect = document.getElementById('advantageHeld');
+    const hardModeSelect = document.getElementById('hardMode');
 
     const suites = ['S', 'H', 'D', 'C'];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
@@ -402,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         soft17,
         surrenderAllowed,
         dasAllowed,
-        hasAdvantage) {
+        hardMode) {
         const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[hand[0] + hand[1]];
         return getCorrectPlayCode(ruleRow, dealerCard);
     }
@@ -455,9 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
             hand,
             decksSelect.value,
             soft17Select.value,
-            surrenderSelect.value === 'yes',
-            dasSelect.value === 'yes',
-            advantageSelect.value === 'yes');
+            surrenderSelect.value === 'checked',
+            dasSelect.value === 'checked',
+            hardModeSelect.value === 'checked');
         const chosenAction = actionCodesByAction[action];
         if (chosenAction === correctPlayCode) {
             playWasCorrect(chosenAction);
@@ -480,15 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
             button.style.backgroundColor = codeColors[actionCodesByAction[action]];
             button.addEventListener('click', () => handleAction(action));
         });
-
-        surrenderSelect.addEventListener('change', () => {
-            buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
-            buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
-            buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
-        });
-        buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
-        buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
-        buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
 
         resultSuccessDiv.style.display = "none";
         resultCloseDiv.style.display = "none";
