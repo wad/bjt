@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': 'Surrender (or split)'
     };
 
-    const codeColors = {
+    const actionCodeColors = {
         'H ': '#28b463',
         'S ': '#e74c3c',
         'Dh': '#85c1e9',
@@ -79,7 +79,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': '#85929e'
     };
 
-    const plays = {
+    // The keys of this object are the two player cards, standardized, in ascending value order.
+    // Each two characters in the associated strings corresponds to an action code, "--", or "..".
+    // The position of these two-character codes indicates the associated dealer card, within each segment.
+    // A segment of 10 of these action codes, separated by "--", are here for different options.
+    // The value "--" is ignored, it's just to make it easier to work with the table, separating segments.
+    // The value ".." (two dots) means "use the default correct play".
+    // The default correct play is the first segment, the leftmost 20 characters of each string,
+    // corresponding to options: 4 or more decks, H17, surrender is available, double after split is available.
+    const correctPlays = {
         //     468,H17,SUR,DS      --468,H17,SUR,nDS     --468,H17,nSUR,DS     --468,H17,nSUR,nDS    --468,S17,SUR,DS      --468,S17,SUR,nDS     --468,S17,nSUR,DS     --468,S17,nSUR,nDS    --2,H17,nSUR,DS       --2,H17,nSUR,nDS      --2,S17,nSUR,DS       --2,S17,nSUR,nDS      --1,H17,nSUR,DS       --1,H17,nSUR,nDS      --1,S17,nSUR,DS       --1,S17,nSUR,nDS
         //     2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A
         '22': 'PhPhPhPhPhPhH H H H --',
@@ -205,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'AA': '4477954444'
     };
 
+    // global variables to hold score info.
     let numCorrect = 0;
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
@@ -241,54 +250,69 @@ document.addEventListener('DOMContentLoaded', () => {
         return sortHand([standardizeCard(hand[0]), standardizeCard(hand[1])]);
     }
 
-    function addCardValues(hand) {
+    function sumCardValues(hand) {
         const cardValueOfDeuce = 2;
         return cardIndexes[hand[0]] + cardValueOfDeuce + cardIndexes[hand[1]] + cardValueOfDeuce;
     }
 
-    function getCellColor(actionCode) {
-        return ' background-color: ' + codeColors[actionCode] + '; color: black;'
+    function getCellColorHtml(actionCode) {
+        return ' background-color: ' + actionCodeColors[actionCode] + '; color: black;'
     }
 
-    function convertRuleRowToTableRow(simplifiedHand, ruleRow) {
+    function convertRuleRowForDisplay(simplifiedHand, ruleRow) {
+        const rowSegmentLength = 20; // 10 actions codes, each one 2 characters long.
         let result = '<tr><td>' + simplifiedHand + '</td>';
-        for (let i = 0; i < ruleRow.length; i += 2) {
+        for (let i = 0; i < rowSegmentLength; i += 2) {
             const actionCode = ruleRow[i] + ruleRow[i + 1];
-            result += '<td style="' + getCellColor(actionCode) + '">' + actionCode + '</td>'
+            result += '<td style="' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
         }
         return result + '</tr>';
     }
 
-    function showTable() {
-        let splitHands = '';
-        let softHands = '';
+    function isHandSplittable(hand) {
+        return hand[0] === hand[1];
+    }
+
+    function isHandSoft(hand) {
+        return hand[1] === 'A';
+    }
+
+    function displayCorrectPlays() {
+        let splitHandsSection = '';
+        let softHandsSection = '';
+
+        // Key is the sum of the card values in the hand. Value is the displayable row of correct plays.
         let hardHandsMap = new Map();
-        const map = Object.entries(plays);
-        for (const [simplifiedHand, ruleRow] of map) {
-            if (simplifiedHand[0] === simplifiedHand[1]) {
-                splitHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
+
+        // Walk through the correct plays, and create displayable rows for the table to display.
+        for (const [hand, ruleRow] of Object.entries(correctPlays)) {
+            if (isHandSplittable(hand)) {
+                splitHandsSection += convertRuleRowForDisplay(hand, ruleRow);
             } else {
-                if (simplifiedHand[1] === 'A') {
-                    softHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
+                if (isHandSoft(hand)) {
+                    softHandsSection += convertRuleRowForDisplay(hand, ruleRow);
                 } else {
-                    let sum = addCardValues(simplifiedHand);
+                    let sum = sumCardValues(hand);
                     if (!hardHandsMap.has(sum)) {
-                        hardHandsMap.set(sum, convertRuleRowToTableRow(sum, ruleRow));
+                        hardHandsMap.set(sum, convertRuleRowForDisplay(sum, ruleRow));
                     }
                 }
             }
         }
 
-        let hardHands = '';
-        for (let i = 0; i < 21; i++) {
+        let hardHandsSection = '';
+        const smallestHardHandSum = 5;
+        const largestHardHandSum = 19;
+        for (let i = smallestHardHandSum; i <= largestHardHandSum; i++) {
             if (hardHandsMap.has(i)) {
-                hardHands += hardHandsMap.get(i);
+                hardHandsSection += hardHandsMap.get(i);
             }
         }
+
         const dealerCardHeader = '<td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>A</td>';
-        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHands
-            + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHands
-            + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHands + '</table>';
+        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHandsSection
+            + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHandsSection
+            + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
     }
 
     function showTableKey() {
@@ -296,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let table = '<table border="1">';
         for (let [actionCode, actionCodeMeaning] of tableKey) {
             table += '<tr>'
-                + '<td style="text-align: left;' + getCellColor(actionCode) + '">' + actionCode + '</td>'
+                + '<td style="text-align: left;' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
                 + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
                 + '</tr>';
         }
@@ -323,14 +347,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function convertHandForDisplay(hand) {
-        if (0 === getRandomInteger(2)) {
+        const randomlySwapOrder = 0 === getRandomInteger(2);
+        if (randomlySwapOrder) {
             return [convertCardForDisplay(hand[0]), convertCardForDisplay(hand[1])];
         } else {
             return [convertCardForDisplay(hand[1]), convertCardForDisplay(hand[0])];
         }
     }
 
-    function determineFrequencyOfSituation(dealerCardFrequencyCode) {
+    function lookupFrequencyInHardMode(dealerCardFrequencyCode) {
+        // The frequency is specified in the table, use the code or the value.
         switch (dealerCardFrequencyCode) {
             case '$':
                 return getRandomInteger(4) === 0 ? 1 : 0;
@@ -343,6 +369,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function computeFlatFrequency(situation) {
+        // To achieve parity with random card generation, we must account for the four types of 10-value cards.
+        let numTenValueCardsInSituation = 0;
+        for (const card of situation) {
+            numTenValueCardsInSituation += card === 'X' ? 1 : 0;
+        }
+        return numTenValueCardsInSituation === 0 ? 1 : numTenValueCardsInSituation * cardsValuedTen.length;
+    }
+
+    // A situation includes the two player cards and the dealer card.
+    // This method generates every possible situation, duplicating ones that should be more frequently chosen,
+    // and randomly selects one from the list.
     function selectSituation(isHardMode) {
         const situationsEntries = Object.entries(situations);
         const availableSituations = [];
@@ -350,8 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let dealerCardIndex = 0; dealerCardIndex < frequenciesByDealerCard.length; dealerCardIndex++) {
                 const situation = handCards + cards[dealerCardIndex];
                 const numTimesToInclude = isHardMode
-                    ? determineFrequencyOfSituation(frequenciesByDealerCard[dealerCardIndex])
-                    : 1;
+                    ? lookupFrequencyInHardMode(frequenciesByDealerCard[dealerCardIndex])
+                    : computeFlatFrequency(situation);
                 for (let i = 0; i < numTimesToInclude; i++) {
                     availableSituations.push(situation);
                 }
@@ -364,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Randomly choose cards for the player and dealer, and display them.
     function deal(isHardMode) {
         const selectedSituation = selectSituation(isHardMode);
 
@@ -378,20 +417,21 @@ document.addEventListener('DOMContentLoaded', () => {
         playerCard2TextDiv.innerText = selectedSituation.hand[1];
     }
 
-    function getCorrectPlayCode(ruleRow, dealerCard) {
-        const i = cardIndexes[dealerCard] * 2;
-        return ruleRow[i] + ruleRow[i + 1];
+    function getActionCodeFromCorrectPlays(correctPlayRow, dealerCard) {
+        const numCharsInActionCode = 2;
+        const i = cardIndexes[dealerCard] * numCharsInActionCode;
+        return correctPlayRow[i] + correctPlayRow[i + 1];
     }
 
-    function lookupCorrectPlayCode(
+    function lookupCorrectActionCode(
         dealerCard,
         hand,
         decks,
         soft17,
         surrenderAllowed,
         dasAllowed) {
-        const ruleRow = plays[hand[0] + hand[1]];
-        return getCorrectPlayCode(ruleRow, dealerCard);
+        const correctPlayRow = correctPlays[hand[0] + hand[1]];
+        return getActionCodeFromCorrectPlays(correctPlayRow, dealerCard);
     }
 
     function wasPlayAlmostCorrect(chosenPlay, correctPlay) {
@@ -438,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
         const isHardMode = hardModeCheckbox.checked;
 
-        const correctPlayCode = lookupCorrectPlayCode(
+        const correctPlayCode = lookupCorrectActionCode(
             dealerCard,
             hand,
             decksSelect.value,
@@ -457,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showScore();
-        showTable();
+        displayCorrectPlays();
         deal(isHardMode);
     }
 
@@ -498,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // button event handlers
         Object.keys(actionCodesByAction).forEach(action => {
             const button = document.getElementById(action);
-            button.style.backgroundColor = codeColors[actionCodesByAction[action]];
+            button.style.backgroundColor = actionCodeColors[actionCodesByAction[action]];
             button.addEventListener('click', () => handleAction(action));
         });
 
@@ -510,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
 
         showScore();
-        showTable();
+        displayCorrectPlays();
         showTableKey();
         deal(hardModeCheckbox.checked);
     }
