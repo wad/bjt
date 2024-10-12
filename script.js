@@ -40,18 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'A': 9
     };
 
-    const actions = [
-        'buttonHit',
-        'buttonStand',
-        'buttonDoubleHit',
-        'buttonDoubleStand',
-        'buttonSplitHit',
-        'buttonSplitStand',
-        'buttonSplitDoubleHit',
-        'buttonSurrenderHit',
-        'buttonSurrenderStand',
-        'buttonSurrenderSplit'];
-
     const actionCodesByAction = {
         'buttonHit': 'H ',
         'buttonStand': 'S ',
@@ -508,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hardModeCheckbox.checked = true;
 
         // button event handlers
-        actions.forEach(action => {
+        Object.keys(actionCodesByAction).forEach(action => {
             const button = document.getElementById(action);
             button.style.backgroundColor = codeColors[actionCodesByAction[action]];
             button.addEventListener('click', () => handleAction(action));
