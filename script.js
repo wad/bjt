@@ -383,16 +383,21 @@ document.addEventListener('DOMContentLoaded', () => {
         tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHandsSection
             + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHandsSection
             + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
+
+        showTableKey(currentOptions);
     }
 
-    function showTableKey() {
+    function showTableKey(currentOptions) {
         const tableKey = Object.entries(actionNamesByActionCode);
         let table = '<table border="1">';
         for (let [actionCode, actionCodeMeaning] of tableKey) {
-            table += '<tr>'
-                + '<td style="text-align: left;' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
-                + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
-                + '</tr>';
+            let isSurrender = actionCode[0] === 'U';
+            if (!isSurrender || (isSurrender && currentOptions.canSur)) {
+                table += '<tr>'
+                    + '<td style="text-align: left;' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
+                    + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
+                    + '</tr>';
+            }
         }
         tableKeyDiv.innerHTML = table + '</table>';
     }
@@ -649,7 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showScore();
         displayCorrectPlays(currentOptions);
         updateSurrenderButtons(currentOptions);
-        showTableKey();
         deal(hardModeCheckbox.checked);
     }
 
