@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const hardModeCheckbox = document.getElementById('hardMode');
     const reverseTableCheckbox = document.getElementById('reverseTable');
 
+    const surrenderHitButton = document.getElementById('buttonSurrenderHit');
+    const surrenderStandButton = document.getElementById('buttonSurrenderStand');
+    const surrenderSplitButton = document.getElementById('buttonSurrenderSplit');
+
     const suites = ['S', 'H', 'D', 'C'];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
     const cardsValuedTen = ['10', 'J', 'Q', 'K'];
@@ -554,6 +558,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function updateSurrenderButtons(currentOptions) {
+        const showSurrenderButtons = currentOptions.canSur;
+        surrenderHitButton.hidden = !showSurrenderButtons;
+        surrenderStandButton.hidden = !showSurrenderButtons;
+        surrenderSplitButton.hidden = !showSurrenderButtons;
+    }
+
     function handleAction(action) {
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
@@ -574,6 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showScore();
         displayCorrectPlays(currentOptions);
+        updateSurrenderButtons(currentOptions);
         deal(isHardMode);
     }
 
@@ -599,7 +611,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'soft17':
                 break;
         }
-        displayCorrectPlays(getCurrentOptions());
+        const currentOptions = getCurrentOptions();
+        updateSurrenderButtons(currentOptions);
+        displayCorrectPlays(currentOptions);
     }
 
     function initialSetup() {
@@ -610,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // default options
         decksSelect.value = '4,6,8-deck';
         soft17Select.value = 'H17';
-        surrenderPermittedCheckbox.checked = true;
+        surrenderPermittedCheckbox.checked = false;
         dasPermittedCheckbox.checked = true;
         hardModeCheckbox.checked = false;
         reverseTableCheckbox.checked = false;
@@ -630,8 +644,11 @@ document.addEventListener('DOMContentLoaded', () => {
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
         reverseTableCheckbox.addEventListener('change', handleOptionChanged);
 
+        const currentOptions = getCurrentOptions();
+
         showScore();
-        displayCorrectPlays(getCurrentOptions());
+        displayCorrectPlays(currentOptions);
+        updateSurrenderButtons(currentOptions);
         showTableKey();
         deal(hardModeCheckbox.checked);
     }
