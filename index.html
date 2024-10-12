@@ -25,8 +25,8 @@
     </div>
     <div>
         <div>
-            <button id="buttonHit">Hit</button>
-            <button id="buttonStand">Stand</button>
+            <button id="buttonHit" style="width: 200px;">Hit</button>
+            <button id="buttonStand" style="width: 200px;">Stand</button>
         </div>
         <div>
             <button id="buttonDoubleHit">Double Down (or hit)</button>
@@ -80,7 +80,7 @@
     <div style="display: flex; align-items: center;">
         <label for="surrenderPermitted" style="margin-right: 10px;">Surrender Permitted:</label>
         <input type="checkbox" id="surrenderPermitted" name="surrenderPermitted" checked>
-        <p class="small-text"><i>(No surrender for one or two deck games.)</i></p>
+        <p class="small-text"><i>(Surrender not supported for one or two deck games.)</i></p>
     </div>
     <div style="display: flex; align-items: center;">
         <label for="doubleAfterSplitPermitted" style="margin-right: 10px;">Double After Split Permitted:</label>
@@ -89,6 +89,7 @@
     <div style="display: flex; align-items: center;">
         <label for="hardMode" style="margin-right: 10px;">Hard mode:</label>
         <input type="checkbox" id="hardMode" name="hardMode" checked>
+        <p class="small-text"><i>(You get mostly tricky situations!)</i></p>
     </div>
     <div>
         <hr>
