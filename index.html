@@ -42,9 +42,10 @@
             <button id="buttonSurrenderStand">Surrender (or stand)</button>
             <button id="buttonSurrenderSplit">Surrender (or split)</button>
         </div>
-        <p class="small-text"><i>(Why the weird button options?
-            Your card pair may be only part of your hand,
-            such as after several splits, which make the primary play unavailable.)</i></p>
+        <p class="small-text"><i>(What's this "Split (or hit)" business?
+            The "Split" would be the best play, but if it's not available, then "hit" would be correct.
+            We're only showing two cards for the player's hand, but there could be more, and they could
+            be after multiple splits, etc.)</i></p>
     </div>
     <div>
         <hr>
@@ -63,41 +64,31 @@
     </div>
     <div>
         <label for="decks">Number of Decks:</label>
-        <select id="decks">
-            <option value="6">6 (default)</option>
-            <!--            <option value="1">1</option>-->
-            <!--            <option value="2">2</option>-->
-            <!--            <option value="4">4</option>-->
-            <!--            <option value="8">8</option>-->
+        <select id="decks" name="decks">
+            <option value="1-deck">1</option>
+            <option value="2-deck">2</option>
+            <option value="4,6,8-deck">4, 6, or 8 (default)</option>
         </select>
     </div>
     <div>
-        <label for="soft17">Soft 17 Rule (S17, dealer stands on soft-17, is best):</label>
-        <select id="soft17">
-            <option value="H17">H17 (default, dealer hits on ace and six)</option>
-            <!--            <option value="S17">S17</option>-->
+        <label for="soft17">Soft 17 Rule (S17 gives the player the better odds):</label>
+        <select id="soft17" name="soft17">
+            <option value="H17">H17: dealer hits on ace and six</option>
+            <option value="S17">S17: dealer stands on ace and six</option>
         </select>
     </div>
-    <div>
-        <label for="surrenderPermitted">Surrender Permitted (preferred):</label>
-        <select id="surrenderPermitted">
-            <option value="yes">Yes (default)</option>
-            <!--            <option value="no">No</option>-->
-        </select>
+    <div style="display: flex; align-items: center;">
+        <label for="surrenderPermitted" style="margin-right: 10px;">Surrender Permitted:</label>
+        <input type="checkbox" id="surrenderPermitted" name="surrenderPermitted" checked>
+        <p class="small-text"><i>(No surrender for one or two deck games.)</i></p>
     </div>
-    <div>
-        <label for="doubleAfterSplitPermitted">Double After Split Permitted (preferred):</label>
-        <select id="doubleAfterSplitPermitted">
-            <option value="yes">Yes (default)</option>
-            <!--            <option value="no">No</option>-->
-        </select>
+    <div style="display: flex; align-items: center;">
+        <label for="doubleAfterSplitPermitted" style="margin-right: 10px;">Double After Split Permitted:</label>
+        <input type="checkbox" id="doubleAfterSplitPermitted" name="doubleAfterSplitPermitted" checked>
     </div>
-    <div>
-        <label for="advantageHeld">Player has advantage:</label>
-        <select id="advantageHeld">
-            <option value="no">No, or unknown (default)</option>
-            <!--            <option value="yes">Yes</option>-->
-        </select>
+    <div style="display: flex; align-items: center;">
+        <label for="hardMode" style="margin-right: 10px;">Hard mode:</label>
+        <input type="checkbox" id="hardMode" name="hardMode" checked>
     </div>
     <div>
         <hr>

@@ -13,14 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
     const tableKeyDiv = document.getElementById('tableKey');
-    const buttonSurrenderHit = document.getElementById('buttonSurrenderHit');
-    const buttonSurrenderStand = document.getElementById('buttonSurrenderStand');
-    const buttonSurrenderSplit = document.getElementById('buttonSurrenderSplit');
     const decksSelect = document.getElementById('decks');
     const soft17Select = document.getElementById('soft17');
-    const surrenderSelect = document.getElementById('surrenderPermitted');
-    const dasSelect = document.getElementById('doubleAfterSplitPermitted');
-    const advantageSelect = document.getElementById('advantageHeld');
+    const surrenderPermittedCheckbox = document.getElementById('surrenderPermitted');
+    const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
+    const hardModeCheckbox = document.getElementById('hardMode');
 
     const suites = ['S', 'H', 'D', 'C'];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
@@ -42,18 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'K': 8,
         'A': 9
     };
-
-    const actions = [
-        'buttonHit',
-        'buttonStand',
-        'buttonDoubleHit',
-        'buttonDoubleStand',
-        'buttonSplitHit',
-        'buttonSplitStand',
-        'buttonSplitDoubleHit',
-        'buttonSurrenderHit',
-        'buttonSurrenderStand',
-        'buttonSurrenderSplit'];
 
     const actionCodesByAction = {
         'buttonHit': 'H ',
@@ -81,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': 'Surrender (or split)'
     };
 
-    const codeColors = {
+    const charsPerActionCode = 2;
+    const actionCodeColors = {
         'H ': '#28b463',
         'S ': '#e74c3c',
         'Dh': '#85c1e9',
@@ -94,61 +80,96 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': '#85929e'
     };
 
-    const TABLE_6D_H17_SUR_DAS_nADV = {
-        '22': 'PhPhPhPhPhPhH H H H ',
-        '23': 'H H H H H H H H H H ',
-        '24': 'H H H H H H H H H H ',
-        '25': 'H H H H H H H H H H ',
-        '26': 'H H H H H H H H H H ',
-        '27': 'H DhDhDhDhH H H H H ',
-        '28': 'DhDhDhDhDhDhDhDhH H ',
-        '29': 'DhDhDhDhDhDhDhDhDhDh',
-        '2X': 'H H S S S H H H H H ',
-        '2A': 'H H H DhDhH H H H H ',
-        '33': 'PhPhPhPhPhPhH H H H ',
-        '34': 'H H H H H H H H H H ',
-        '35': 'H H H H H H H H H H ',
-        '36': 'H DhDhDhDhH H H H H ',
-        '37': 'DhDhDhDhDhDhDhDhH H ',
-        '38': 'DhDhDhDhDhDhDhDhDhDh',
-        '39': 'H H S S S H H H H H ',
-        '3X': 'S S S S S H H H H H ',
-        '3A': 'H H H DhDhH H H H H ',
-        '44': 'H H H PhPhH H H H H ',
-        '45': 'H DhDhDhDhH H H H H ',
-        '46': 'DhDhDhDhDhDhDhDhH H ',
-        '47': 'DhDhDhDhDhDhDhDhDhDh',
-        '48': 'H H S S S H H H H H ',
-        '49': 'S S S S S H H H H H ',
-        '4X': 'S S S S S H H H H H ',
-        '4A': 'H H DhDhDhH H H H H ',
-        '55': 'DhDhDhDhDhDhDhDhH H ',
-        '56': 'DhDhDhDhDhDhDhDhDhDh',
-        '57': 'H H S S S H H H H H ',
-        '58': 'S S S S S H H H H H ',
-        '59': 'S S S S S H H H H H ',
-        '5X': 'S S S S S H H H UhUh',
-        '5A': 'H H DhDhDhH H H H H ',
-        '66': 'PhPhPsPsPsH H H H H ',
-        '67': 'S S S S S H H H H H ',
-        '68': 'S S S S S H H H H H ',
-        '69': 'S S S S S H H H UhUh',
-        '6X': 'S S S S S H H UhUhUh',
-        '6A': 'H DhDhDhDhH H H H H ',
-        '77': 'PsPsPsPsPsPhH H H H ',
-        '78': 'S S S S S H H H UhUh',
-        '79': 'S S S S S H H UhUhUh',
-        '7X': 'S S S S S S S S S Us',
-        '7A': 'DsDsDsDsDsS S H H H ',
-        '88': 'PsPsPsPsPsPhPhPhPhUp',
-        '89': 'S S S S S S S S S Us',
-        '8X': 'S S S S S S S S S S ',
-        '8A': 'S S S S DsS S S S S ',
-        '99': 'PsPsPsPsPsS PsPsS S ',
-        '9X': 'S S S S S S S S S S ',
-        '9A': 'S S S S S S S S S S ',
-        'XX': 'S S S S S S S S S S ',
-        'AA': 'PhPhPsPsPdPhPhPhPhPh'
+    const numCharsInSegment = charsPerActionCode * cards.length;
+    const numCharsInSegmentWithDivider = numCharsInSegment + 2;
+    const correctPlaySegmentOffsets = {
+        '4HUD': 0,
+        '4HUd': numCharsInSegmentWithDivider,
+        '4HuD': 2 * numCharsInSegmentWithDivider,
+        '4Hud': 3 * numCharsInSegmentWithDivider,
+        '4hUD': 4 * numCharsInSegmentWithDivider,
+        '4hUd': 5 * numCharsInSegmentWithDivider,
+        '4huD': 6 * numCharsInSegmentWithDivider,
+        '4hud': 7 * numCharsInSegmentWithDivider,
+        '2HuD': 8 * numCharsInSegmentWithDivider,
+        '2Hud': 9 * numCharsInSegmentWithDivider,
+        '2huD': 10 * numCharsInSegmentWithDivider,
+        '2hud': 11 * numCharsInSegmentWithDivider,
+        '1HuD': 12 * numCharsInSegmentWithDivider,
+        '1Hud': 13 * numCharsInSegmentWithDivider,
+        '1huD': 14 * numCharsInSegmentWithDivider,
+        '1hud': 15 * numCharsInSegmentWithDivider
+    };
+
+    // todo: Fill in the rest of this table.
+    // The keys of this object are the two player cards, standardized, in ascending value order.
+    // Each two characters in the associated strings corresponds to an action code, "--", or "..".
+    // The position of these two-character codes indicates the associated dealer card, within each segment.
+    // A segment of 10 of these action codes, separated by "--", are here for different options.
+    // The value "--" is ignored, it's just to make it easier to work with the table, separating segments.
+    // The value ".." (two dots) means "use the default correct play".
+    // The default correct play is the first segment, the leftmost 20 characters of each string,
+    // corresponding to options: 4 or more decks, H17, surrender is available, double after split is available.
+    const correctPlays = { //                                                                                                                                                                 ooooooooooo           ooooooooo          oooooooooooooooo        oooooooooo                                                                                                                                       ################
+        //     468,H17,SUR,DS        468,H17,SUR,nDS       468,H17,nSUR,DS       468,H17,nSUR,nDS      468,S17,SUR,DS        468,S17,SUR,nDS       468,S17,nSUR,DS       468,S17,nSUR,nDS      2,H17,nSUR,DS         2,H17,nSUR,nDS        2,S17,nSUR,DS         2,S17,nSUR,nDS        1,H17,nSUR,DS         1,H17,nSUR,nDS        1,S17,nSUR,DS         1,S17,nSUR,nDS
+        //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
+        '22': 'PhPhPhPhPhPhH H H H --H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H ..................--....................--H ..................--....................--H ..................--....................--H ..................',
+        '23': 'H H H H H H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '24': 'H H H H H H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '25': 'H H H H H H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '26': 'H H H H H H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--......DhDh..........--......DhDh..........--......DhDh..........--......DhDh..........',
+        '27': 'H DhDhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................',
+        '28': 'DhDhDhDhDhDhDhDhH H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '29': 'DhDhDhDhDhDhDhDhDhDh--....................--....................--....................--..................H --..................H --..................H --..................H --....................--....................--....................--....................--....................--....................--....................--....................',
+        '2X': 'H H S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '2A': 'H H H DhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....H ..............--....H ..............--....H ..............--....H ..............',
+        '33': 'PhPhPhPhPhPhH H H H --H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H H ................',
+        '34': 'H H H H H H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '35': 'H H H H H H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--......DhDh..........--......DhDh..........--......DhDh..........--......DhDh..........',
+        '36': 'H DhDhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................',
+        '37': 'DhDhDhDhDhDhDhDhH H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '38': 'DhDhDhDhDhDhDhDhDhDh--....................--....................--....................--..................H --..................H --..................H --..................H --....................--....................--....................--....................--....................--....................--....................--....................',
+        '39': 'H H S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '3X': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '3A': 'H H H DhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....Dh..............--....Dh..............--....................--....................--....H ..............--....H ..............--....H ..............--....H ..............',
+        '44': 'H H H PhPhH H H H H --......H H ..........--....................--......H H ..........--....................--......H H ..........--....................--......H H ..........--....................--......H H ..........--....................--......H H ..........--......PdPd..........--......H H ..........--......PdPd..........--......H H ..........',
+        '45': 'H DhDhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................--Dh..................',
+        '46': 'DhDhDhDhDhDhDhDhH H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '47': 'DhDhDhDhDhDhDhDhDhDh--....................--....................--....................--..................H --..................H --..................H --..................H --....................--....................--....................--....................--....................--....................--....................--....................',
+        '48': 'H H S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '49': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '4X': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '4A': 'H H DhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        //                                                                                                                                                                                                                                                                                                                                                                                   ################
+        //     468,H17,SUR,DS        468,H17,SUR,nDS       468,H17,nSUR,DS       468,H17,nSUR,nDS      468,S17,SUR,DS        468,S17,SUR,nDS       468,S17,nSUR,DS       468,S17,nSUR,nDS      2,H17,nSUR,DS         2,H17,nSUR,nDS        2,S17,nSUR,DS         2,S17,nSUR,nDS        1,H17,nSUR,DS         1,H17,nSUR,nDS        1,S17,nSUR,DS         1,S17,nSUR,nDS
+        //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
+        '55': 'DhDhDhDhDhDhDhDhH H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '56': 'DhDhDhDhDhDhDhDhDhDh--....................--....................--....................--..................H --..................H --..................H --..................H --....................--....................--....................--....................--....................--....................--....................--....................',
+        '57': 'H H S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '58': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '59': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '5X': 'S S S S S H H H UhUh--....................--................H H --................H H --..................H --..................H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H ',
+        '5A': 'H H DhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '66': 'PhPhPsPsPsH H H H H --H ..................--....................--H ..................--....................--H ..................--....................--H ..................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '67': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '68': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '69': 'S S S S S H H H UhUh--....................--................H H --................H H --..................H --..................H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H ',
+        '6X': 'S S S S S H H UhUhUh--....................--..............H H H --..............H H H --....................--....................--..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H ',
+        '6A': 'H DhDhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--Dh..................--Dh..................--Dh..................--Dh..................',
+        '77': 'PsPsPsPsPsPhH H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '78': 'S S S S S H H H UhUh--....................--................H H --................H H --..................H --..................H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H --................H H ',
+        '79': 'S S S S S H H UhUhUh--....................--..............H H H --..............H H H --....................--....................--..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H --..............H H H ',
+        '7X': 'S S S S S S S S S Us--....................--..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S ',
+        '7A': 'DsDsDsDsDsS S H H H --....................--....................--....................--S ..................--S ..................--S ..................--S ..................--....................--....................--S ..................--S ..................--S ..................--S ..................--S ................S --S ................S ',
+        '88': 'PsPsPsPsPsPhPhPhPhUp--....................--..................Ph--..................Ph--..................Ph--..................Ph--..................Ps--..................Ps--..................Ph--..................Ph--..................Ph--..................Ph--..................Ph--..................Ph--..................Ph--..................Ph',
+        '89': 'S S S S S S S S S Us--....................--..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S --..................S ',
+        '8X': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '8A': 'S S S S DsS S S S S --....................--....................--....................--........S ..........--........S ..........--........S ..........--........S ..........--....................--....................--........S ..........--........S ..........--....................--....................--....................--....................',
+        '99': 'PsPsPsPsPsS PsPsS S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '9X': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '9A': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        'XX': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        'AA': 'PhPhPsPsPdPhPhPhPhPh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................'
     };
 
     // The position in each string corresponds to the dealer card.
@@ -218,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'AA': '4477954444'
     };
 
+    // global variables to hold score info.
     let numCorrect = 0;
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
@@ -254,54 +276,95 @@ document.addEventListener('DOMContentLoaded', () => {
         return sortHand([standardizeCard(hand[0]), standardizeCard(hand[1])]);
     }
 
-    function addCardValues(hand) {
+    function sumCardValues(hand) {
         const cardValueOfDeuce = 2;
         return cardIndexes[hand[0]] + cardValueOfDeuce + cardIndexes[hand[1]] + cardValueOfDeuce;
     }
 
-    function getCellColor(actionCode) {
-        return ' background-color: ' + codeColors[actionCode] + '; color: black;'
+    function getCellColorHtml(actionCode) {
+        return ' background-color: ' + actionCodeColors[actionCode] + '; color: black;'
     }
 
-    function convertRuleRowToTableRow(simplifiedHand, ruleRow) {
+    function mergeSegments(base, diff) {
+        let newBase = '';
+        for (let i = 0; i < numCharsInSegment; i++) {
+            if (diff[i] === '.') {
+                newBase += base[i];
+            } else {
+                newBase += diff[i];
+            }
+        }
+        return newBase;
+    }
+
+    function getCorrectPlayRowSegment(correctPlayRow, currentOptions) {
+        const lookupKey = '' + currentOptions.decks
+            + (currentOptions.isH17 ? 'H' : 'h')
+            + (currentOptions.canSur ? 'U' : 'u')
+            + (currentOptions.canDas ? 'D' : 'd');
+        const segmentOffset = correctPlaySegmentOffsets[lookupKey];
+        let finalSegment = correctPlayRow.substring(0, numCharsInSegment);
+        if (segmentOffset === 0) {
+            return finalSegment;
+        }
+        const specificSegment = correctPlayRow.substring(segmentOffset, segmentOffset + numCharsInSegment);
+        return mergeSegments(finalSegment, specificSegment);
+    }
+
+    function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment) {
         let result = '<tr><td>' + simplifiedHand + '</td>';
-        for (let i = 0; i < ruleRow.length; i += 2) {
-            const actionCode = ruleRow[i] + ruleRow[i + 1];
-            result += '<td style="' + getCellColor(actionCode) + '">' + actionCode + '</td>'
+        for (let i = 0; i < numCharsInSegment; i += 2) {
+            const actionCode = correctPlayRowSegment[i] + correctPlayRowSegment[i + 1];
+            result += '<td style="' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
         }
         return result + '</tr>';
     }
 
-    function showTable() {
-        let splitHands = '';
-        let softHands = '';
+    function isHandSplittable(hand) {
+        return hand[0] === hand[1];
+    }
+
+    function isHandSoft(hand) {
+        return hand[1] === 'A';
+    }
+
+    function displayCorrectPlays(currentOptions) {
+        let splitHandsSection = '';
+        let softHandsSection = '';
+
+        // Key is the sum of the card values in the hand. Value is the displayable row of correct plays.
         let hardHandsMap = new Map();
-        const map = Object.entries(TABLE_6D_H17_SUR_DAS_nADV);
-        for (const [simplifiedHand, ruleRow] of map) {
-            if (simplifiedHand[0] === simplifiedHand[1]) {
-                splitHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
+
+        // Walk through the correct plays, and create displayable rows for the table to display.
+        for (const [hand, correctPlayRow] of Object.entries(correctPlays)) {
+            const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
+            if (isHandSplittable(hand)) {
+                splitHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment);
             } else {
-                if (simplifiedHand[1] === 'A') {
-                    softHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
+                if (isHandSoft(hand)) {
+                    softHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment);
                 } else {
-                    let sum = addCardValues(simplifiedHand);
+                    let sum = sumCardValues(hand);
                     if (!hardHandsMap.has(sum)) {
-                        hardHandsMap.set(sum, convertRuleRowToTableRow(sum, ruleRow));
+                        hardHandsMap.set(sum, convertCorrectPlayRowForDisplay(sum, correctPlayRowSegment));
                     }
                 }
             }
         }
 
-        let hardHands = '';
-        for (let i = 0; i < 21; i++) {
+        let hardHandsSection = '';
+        const smallestHardHandSum = 5;
+        const largestHardHandSum = 19;
+        for (let i = smallestHardHandSum; i <= largestHardHandSum; i++) {
             if (hardHandsMap.has(i)) {
-                hardHands += hardHandsMap.get(i);
+                hardHandsSection += hardHandsMap.get(i);
             }
         }
+
         const dealerCardHeader = '<td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>A</td>';
-        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHands
-            + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHands
-            + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHands + '</table>';
+        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHandsSection
+            + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHandsSection
+            + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
     }
 
     function showTableKey() {
@@ -309,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let table = '<table border="1">';
         for (let [actionCode, actionCodeMeaning] of tableKey) {
             table += '<tr>'
-                + '<td style="text-align: left;' + getCellColor(actionCode) + '">' + actionCode + '</td>'
+                + '<td style="text-align: left;' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
                 + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
                 + '</tr>';
         }
@@ -336,14 +399,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function convertHandForDisplay(hand) {
-        if (0 === getRandomInteger(2)) {
+        const randomlySwapOrder = 0 === getRandomInteger(2);
+        if (randomlySwapOrder) {
             return [convertCardForDisplay(hand[0]), convertCardForDisplay(hand[1])];
         } else {
             return [convertCardForDisplay(hand[1]), convertCardForDisplay(hand[0])];
         }
     }
 
-    function determineFrequencyOfSituation(dealerCardFrequencyCode) {
+    function lookupFrequencyInHardMode(dealerCardFrequencyCode) {
+        // The frequency is specified in the table, use the code or the value.
         switch (dealerCardFrequencyCode) {
             case '$':
                 return getRandomInteger(4) === 0 ? 1 : 0;
@@ -356,14 +421,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function selectSituation() {
+    function computeFlatFrequency(situation) {
+        // To achieve parity with random card generation, we must account for the four types of 10-value cards.
+        let numTenValueCardsInSituation = 0;
+        for (const card of situation) {
+            numTenValueCardsInSituation += card === 'X' ? 1 : 0;
+        }
+        return numTenValueCardsInSituation === 0 ? 1 : numTenValueCardsInSituation * cardsValuedTen.length;
+    }
+
+    // A situation includes the two player cards and the dealer card.
+    // This method generates every possible situation, duplicating ones that should be more frequently chosen,
+    // and randomly selects one from the list.
+    function selectSituation(isHardMode) {
         const situationsEntries = Object.entries(situations);
         const availableSituations = [];
-        let numTimesToInclude = 0;
         for (let [handCards, frequenciesByDealerCard] of situationsEntries) {
             for (let dealerCardIndex = 0; dealerCardIndex < frequenciesByDealerCard.length; dealerCardIndex++) {
                 const situation = handCards + cards[dealerCardIndex];
-                numTimesToInclude = determineFrequencyOfSituation(frequenciesByDealerCard[dealerCardIndex]);
+                const numTimesToInclude = isHardMode
+                    ? lookupFrequencyInHardMode(frequenciesByDealerCard[dealerCardIndex])
+                    : computeFlatFrequency(situation);
                 for (let i = 0; i < numTimesToInclude; i++) {
                     availableSituations.push(situation);
                 }
@@ -376,8 +454,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function deal() {
-        const selectedSituation = selectSituation();
+    // Randomly choose cards for the player and dealer, and display them.
+    function deal(isHardMode) {
+        const selectedSituation = selectSituation(isHardMode);
 
         dealerCardDiv.innerHTML = '<img src="' + getCardImageFilename(
             selectedSituation.dealerCard) + '" alt="' + selectedSituation.dealerCard + '" width="100">';
@@ -390,21 +469,15 @@ document.addEventListener('DOMContentLoaded', () => {
         playerCard2TextDiv.innerText = selectedSituation.hand[1];
     }
 
-    function getCorrectPlayCode(ruleRow, dealerCard) {
-        const i = cardIndexes[dealerCard] * 2;
-        return ruleRow[i] + ruleRow[i + 1];
+    function getActionCodeFromCorrectPlays(correctPlayRow, dealerCard) {
+        const i = cardIndexes[dealerCard] * charsPerActionCode;
+        return correctPlayRow[i] + correctPlayRow[i + 1];
     }
 
-    function lookupCorrectPlayCode(
-        dealerCard,
-        hand,
-        decks,
-        soft17,
-        surrenderAllowed,
-        dasAllowed,
-        hasAdvantage) {
-        const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[hand[0] + hand[1]];
-        return getCorrectPlayCode(ruleRow, dealerCard);
+    function lookupCorrectActionCode(dealerCard, hand, currentOptions) {
+        const correctPlayRow = correctPlays[hand[0] + hand[1]];
+        const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
+        return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
     }
 
     function wasPlayAlmostCorrect(chosenPlay, correctPlay) {
@@ -446,18 +519,33 @@ document.addEventListener('DOMContentLoaded', () => {
             + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
     }
 
+    function getNumDecks(selectedValue) {
+        switch (selectedValue) {
+            case '1-deck':
+                return 1;
+            case '2-deck':
+                return 2;
+            case '4,6,8-deck':
+                return 4;
+        }
+    }
+
+    function getCurrentOptions() {
+        return {
+            decks: getNumDecks(decksSelect.value),
+            isH17: soft17Select.value === 'H17',
+            canSur: surrenderPermittedCheckbox.checked,
+            canDas: dasPermittedCheckbox.checked
+        }
+    }
+
     function handleAction(action) {
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
+        const isHardMode = hardModeCheckbox.checked;
 
-        const correctPlayCode = lookupCorrectPlayCode(
-            dealerCard,
-            hand,
-            decksSelect.value,
-            soft17Select.value,
-            surrenderSelect.value === 'yes',
-            dasSelect.value === 'yes',
-            advantageSelect.value === 'yes');
+        const currentOptions = getCurrentOptions();
+        const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions);
         const chosenAction = actionCodesByAction[action];
         if (chosenAction === correctPlayCode) {
             playWasCorrect(chosenAction);
@@ -470,34 +558,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showScore();
-        showTable();
-        deal();
+        displayCorrectPlays(currentOptions);
+        deal(isHardMode);
+    }
+
+    function handleOptionChanged(event) {
+        switch (event.target.name) {
+            case 'surrenderPermitted':
+                if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
+                    surrenderPermittedCheckbox.checked = false;
+                }
+                break;
+            case 'doubleAfterSplitPermitted':
+                break;
+            case 'hardMode':
+                deal(hardModeCheckbox.checked);
+                break;
+            case 'decks':
+                if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
+                    surrenderPermittedCheckbox.checked = false;
+                }
+                break;
+            case 'soft17':
+                break;
+        }
+        displayCorrectPlays(getCurrentOptions());
     }
 
     function initialSetup() {
-        actions.forEach(action => {
+
+        // Clear out anything in the play result area
+        updatePlayResult(false, false, false);
+
+        // default options
+        decksSelect.value = '4,6,8-deck';
+        soft17Select.value = 'H17';
+        surrenderPermittedCheckbox.checked = true;
+        dasPermittedCheckbox.checked = true;
+        hardModeCheckbox.checked = true;
+
+        // button event handlers
+        Object.keys(actionCodesByAction).forEach(action => {
             const button = document.getElementById(action);
-            button.style.backgroundColor = codeColors[actionCodesByAction[action]];
+            button.style.backgroundColor = actionCodeColors[actionCodesByAction[action]];
             button.addEventListener('click', () => handleAction(action));
         });
 
-        surrenderSelect.addEventListener('change', () => {
-            buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
-            buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
-            buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
-        });
-        buttonSurrenderHit.disabled = surrenderSelect.value === 'no';
-        buttonSurrenderStand.disabled = surrenderSelect.value === 'no';
-        buttonSurrenderSplit.disabled = surrenderSelect.value === 'no';
-
-        resultSuccessDiv.style.display = "none";
-        resultCloseDiv.style.display = "none";
-        resultFailureDiv.style.display = "none";
+        // options event handlers
+        decksSelect.addEventListener('change', handleOptionChanged);
+        soft17Select.addEventListener('change', handleOptionChanged);
+        surrenderPermittedCheckbox.addEventListener('change', handleOptionChanged);
+        dasPermittedCheckbox.addEventListener('change', handleOptionChanged);
+        hardModeCheckbox.addEventListener('change', handleOptionChanged);
 
         showScore();
-        showTable();
+        displayCorrectPlays(getCurrentOptions());
         showTableKey();
-        deal();
+        deal(hardModeCheckbox.checked);
     }
 
     initialSetup();
