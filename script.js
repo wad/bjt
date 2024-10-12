@@ -91,61 +91,63 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': '#85929e'
     };
 
-    const TABLE_6D_H17_SUR_DAS_nADV = {
-        '22': 'PhPhPhPhPhPhH H H H ',
-        '23': 'H H H H H H H H H H ',
-        '24': 'H H H H H H H H H H ',
-        '25': 'H H H H H H H H H H ',
-        '26': 'H H H H H H H H H H ',
-        '27': 'H DhDhDhDhH H H H H ',
-        '28': 'DhDhDhDhDhDhDhDhH H ',
-        '29': 'DhDhDhDhDhDhDhDhDhDh',
-        '2X': 'H H S S S H H H H H ',
-        '2A': 'H H H DhDhH H H H H ',
-        '33': 'PhPhPhPhPhPhH H H H ',
-        '34': 'H H H H H H H H H H ',
-        '35': 'H H H H H H H H H H ',
-        '36': 'H DhDhDhDhH H H H H ',
-        '37': 'DhDhDhDhDhDhDhDhH H ',
-        '38': 'DhDhDhDhDhDhDhDhDhDh',
-        '39': 'H H S S S H H H H H ',
-        '3X': 'S S S S S H H H H H ',
-        '3A': 'H H H DhDhH H H H H ',
-        '44': 'H H H PhPhH H H H H ',
-        '45': 'H DhDhDhDhH H H H H ',
-        '46': 'DhDhDhDhDhDhDhDhH H ',
-        '47': 'DhDhDhDhDhDhDhDhDhDh',
-        '48': 'H H S S S H H H H H ',
-        '49': 'S S S S S H H H H H ',
-        '4X': 'S S S S S H H H H H ',
-        '4A': 'H H DhDhDhH H H H H ',
-        '55': 'DhDhDhDhDhDhDhDhH H ',
-        '56': 'DhDhDhDhDhDhDhDhDhDh',
-        '57': 'H H S S S H H H H H ',
-        '58': 'S S S S S H H H H H ',
-        '59': 'S S S S S H H H H H ',
-        '5X': 'S S S S S H H H UhUh',
-        '5A': 'H H DhDhDhH H H H H ',
-        '66': 'PhPhPsPsPsH H H H H ',
-        '67': 'S S S S S H H H H H ',
-        '68': 'S S S S S H H H H H ',
-        '69': 'S S S S S H H H UhUh',
-        '6X': 'S S S S S H H UhUhUh',
-        '6A': 'H DhDhDhDhH H H H H ',
-        '77': 'PsPsPsPsPsPhH H H H ',
-        '78': 'S S S S S H H H UhUh',
-        '79': 'S S S S S H H UhUhUh',
-        '7X': 'S S S S S S S S S Us',
-        '7A': 'DsDsDsDsDsS S H H H ',
-        '88': 'PsPsPsPsPsPhPhPhPhUp',
-        '89': 'S S S S S S S S S Us',
-        '8X': 'S S S S S S S S S S ',
-        '8A': 'S S S S DsS S S S S ',
-        '99': 'PsPsPsPsPsS PsPsS S ',
-        '9X': 'S S S S S S S S S S ',
-        '9A': 'S S S S S S S S S S ',
-        'XX': 'S S S S S S S S S S ',
-        'AA': 'PhPhPsPsPdPhPhPhPhPh'
+    const plays = {
+        //     468,H17,SUR,DS      --468,H17,SUR,nDS     --468,H17,nSUR,DS     --468,H17,nSUR,nDS    --468,S17,SUR,DS      --468,S17,SUR,nDS     --468,S17,nSUR,DS     --468,S17,nSUR,nDS    --2,H17,nSUR,DS       --2,H17,nSUR,nDS      --2,S17,nSUR,DS       --2,S17,nSUR,nDS      --1,H17,nSUR,DS       --1,H17,nSUR,nDS      --1,S17,nSUR,DS       --1,S17,nSUR,nDS
+        //     2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A --2 3 4 5 6 7 8 9 X A
+        '22': 'PhPhPhPhPhPhH H H H --',
+        '23': 'H H H H H H H H H H --',
+        '24': 'H H H H H H H H H H --',
+        '25': 'H H H H H H H H H H --',
+        '26': 'H H H H H H H H H H --',
+        '27': 'H DhDhDhDhH H H H H --',
+        '28': 'DhDhDhDhDhDhDhDhH H --',
+        '29': 'DhDhDhDhDhDhDhDhDhDh--',
+        '2X': 'H H S S S H H H H H --',
+        '2A': 'H H H DhDhH H H H H --',
+        '33': 'PhPhPhPhPhPhH H H H --',
+        '34': 'H H H H H H H H H H --',
+        '35': 'H H H H H H H H H H --',
+        '36': 'H DhDhDhDhH H H H H --',
+        '37': 'DhDhDhDhDhDhDhDhH H --',
+        '38': 'DhDhDhDhDhDhDhDhDhDh--',
+        '39': 'H H S S S H H H H H --',
+        '3X': 'S S S S S H H H H H --',
+        '3A': 'H H H DhDhH H H H H --',
+        '44': 'H H H PhPhH H H H H --',
+        '45': 'H DhDhDhDhH H H H H --',
+        '46': 'DhDhDhDhDhDhDhDhH H --',
+        '47': 'DhDhDhDhDhDhDhDhDhDh--',
+        '48': 'H H S S S H H H H H --',
+        '49': 'S S S S S H H H H H --',
+        '4X': 'S S S S S H H H H H --',
+        '4A': 'H H DhDhDhH H H H H --',
+        '55': 'DhDhDhDhDhDhDhDhH H --',
+        '56': 'DhDhDhDhDhDhDhDhDhDh--',
+        '57': 'H H S S S H H H H H --',
+        '58': 'S S S S S H H H H H --',
+        '59': 'S S S S S H H H H H --',
+        '5X': 'S S S S S H H H UhUh--',
+        '5A': 'H H DhDhDhH H H H H --',
+        '66': 'PhPhPsPsPsH H H H H --',
+        '67': 'S S S S S H H H H H --',
+        '68': 'S S S S S H H H H H --',
+        '69': 'S S S S S H H H UhUh--',
+        '6X': 'S S S S S H H UhUhUh--',
+        '6A': 'H DhDhDhDhH H H H H --',
+        '77': 'PsPsPsPsPsPhH H H H --',
+        '78': 'S S S S S H H H UhUh--',
+        '79': 'S S S S S H H UhUhUh--',
+        '7X': 'S S S S S S S S S Us--',
+        '7A': 'DsDsDsDsDsS S H H H --',
+        '88': 'PsPsPsPsPsPhPhPhPhUp--',
+        '89': 'S S S S S S S S S Us--',
+        '8X': 'S S S S S S S S S S --',
+        '8A': 'S S S S DsS S S S S --',
+        '99': 'PsPsPsPsPsS PsPsS S --',
+        '9X': 'S S S S S S S S S S --',
+        '9A': 'S S S S S S S S S S --',
+        'XX': 'S S S S S S S S S S --',
+        'AA': 'PhPhPsPsPdPhPhPhPhPh--'
     };
 
     // The position in each string corresponds to the dealer card.
@@ -273,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let splitHands = '';
         let softHands = '';
         let hardHandsMap = new Map();
-        const map = Object.entries(TABLE_6D_H17_SUR_DAS_nADV);
+        const map = Object.entries(plays);
         for (const [simplifiedHand, ruleRow] of map) {
             if (simplifiedHand[0] === simplifiedHand[1]) {
                 splitHands += convertRuleRowToTableRow(simplifiedHand, ruleRow);
@@ -400,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
         soft17,
         surrenderAllowed,
         dasAllowed) {
-        const ruleRow = TABLE_6D_H17_SUR_DAS_nADV[hand[0] + hand[1]];
+        const ruleRow = plays[hand[0] + hand[1]];
         return getCorrectPlayCode(ruleRow, dealerCard);
     }
 
@@ -472,27 +474,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleOptionChanged(event) {
-        const element = event.target;
-        if (element.tagName === 'INPUT' && element.type === 'checkbox') {
-            switch (element.name) {
-                case 'surrenderPermitted':
-                    break;
-                case 'doubleAfterSplitPermitted':
-                    break;
-                case 'hardMode':
-                    deal(element.checked);
-                    break;
-            }
-        } else if (element.tagName === 'SELECT') {
-            const elementValue = element.value;
-            switch (element.name) {
-                case 'decks':
-                    console.log("decks: " + elementValue);
-                    break;
-                case 'soft17':
-                    console.log("S17: " + elementValue);
-                    break;
-            }
+        switch (event.target.name) {
+            case 'surrenderPermitted':
+                if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
+                    surrenderPermittedCheckbox.checked = false;
+                }
+                break;
+            case 'doubleAfterSplitPermitted':
+                break;
+            case 'hardMode':
+                deal(hardModeCheckbox.checked);
+                break;
+            case 'decks':
+                if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
+                    surrenderPermittedCheckbox.checked = false;
+                }
+                break;
+            case 'soft17':
+                break;
         }
     }
 
@@ -500,6 +499,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clear out anything in the play result area
         updatePlayResult(false, false, false);
+
+        // default options
+        decksSelect.value = '4,6,8-deck';
+        soft17Select.value = 'H17';
+        surrenderPermittedCheckbox.checked = true;
+        dasPermittedCheckbox.checked = true;
+        hardModeCheckbox.checked = true;
 
         // button event handlers
         actions.forEach(action => {
