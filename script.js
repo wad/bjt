@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const surrenderPermittedCheckbox = document.getElementById('surrenderPermitted');
     const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
     const hardModeCheckbox = document.getElementById('hardMode');
+    const reverseTableCheckbox = document.getElementById('reverseTable');
 
     const suites = ['S', 'H', 'D', 'C'];
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
@@ -335,8 +336,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Key is the sum of the card values in the hand. Value is the displayable row of correct plays.
         let hardHandsMap = new Map();
 
+        let entries = Object.entries(correctPlays);
+        if (currentOptions.reversed) {
+            entries.reverse();
+        }
+
         // Walk through the correct plays, and create displayable rows for the table to display.
-        for (const [hand, correctPlayRow] of Object.entries(correctPlays)) {
+        for (const [hand, correctPlayRow] of entries) {
             const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
             if (isHandSplittable(hand)) {
                 splitHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment);
@@ -355,9 +361,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let hardHandsSection = '';
         const smallestHardHandSum = 5;
         const largestHardHandSum = 19;
-        for (let i = smallestHardHandSum; i <= largestHardHandSum; i++) {
-            if (hardHandsMap.has(i)) {
-                hardHandsSection += hardHandsMap.get(i);
+        if (currentOptions.reversed) {
+            for (let i = largestHardHandSum; i >= smallestHardHandSum; i--) {
+                if (hardHandsMap.has(i)) {
+                    hardHandsSection += hardHandsMap.get(i);
+                }
+            }
+        } else {
+            for (let i = smallestHardHandSum; i <= largestHardHandSum; i++) {
+                if (hardHandsMap.has(i)) {
+                    hardHandsSection += hardHandsMap.get(i);
+                }
             }
         }
 
@@ -535,7 +549,8 @@ document.addEventListener('DOMContentLoaded', () => {
             decks: getNumDecks(decksSelect.value),
             isH17: soft17Select.value === 'H17',
             canSur: surrenderPermittedCheckbox.checked,
-            canDas: dasPermittedCheckbox.checked
+            canDas: dasPermittedCheckbox.checked,
+            reversed: reverseTableCheckbox.checked
         }
     }
 
@@ -574,6 +589,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'hardMode':
                 deal(hardModeCheckbox.checked);
                 break;
+            case 'reverseTable':
+                break;
             case 'decks':
                 if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
                     surrenderPermittedCheckbox.checked = false;
@@ -595,7 +612,8 @@ document.addEventListener('DOMContentLoaded', () => {
         soft17Select.value = 'H17';
         surrenderPermittedCheckbox.checked = true;
         dasPermittedCheckbox.checked = true;
-        hardModeCheckbox.checked = true;
+        hardModeCheckbox.checked = false;
+        reverseTableCheckbox.checked = false;
 
         // button event handlers
         Object.keys(actionCodesByAction).forEach(action => {
@@ -610,6 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
         surrenderPermittedCheckbox.addEventListener('change', handleOptionChanged);
         dasPermittedCheckbox.addEventListener('change', handleOptionChanged);
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
+        reverseTableCheckbox.addEventListener('change', handleOptionChanged);
 
         showScore();
         displayCorrectPlays(getCurrentOptions());
