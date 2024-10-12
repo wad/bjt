@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': 'Surrender (or split)'
     };
 
+    const charsPerActionCode = 2;
     const actionCodeColors = {
         'H ': '#28b463',
         'S ': '#e74c3c',
@@ -79,24 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': '#85929e'
     };
 
-    const segmentSize = 20 + 2;
+    const numCharsInSegment = charsPerActionCode * cards.length;
+    const numCharsInSegmentWithDivider = numCharsInSegment + 2;
     const correctPlaySegmentOffsets = {
         '4HUD': 0,
-        '4HUd': segmentSize,
-        '4HuD': 2 * segmentSize,
-        '4Hud': 3 * segmentSize,
-        '4hUD': 4 * segmentSize,
-        '4hUd': 5 * segmentSize,
-        '4huD': 6 * segmentSize,
-        '4hud': 7 * segmentSize,
-        '2HuD': 8 * segmentSize,
-        '2Hud': 9 * segmentSize,
-        '2huD': 10 * segmentSize,
-        '2hud': 11 * segmentSize,
-        '1HuD': 12 * segmentSize,
-        '1Hud': 13 * segmentSize,
-        '1huD': 14 * segmentSize,
-        '1hud': 15 * segmentSize
+        '4HUd': numCharsInSegmentWithDivider,
+        '4HuD': 2 * numCharsInSegmentWithDivider,
+        '4Hud': 3 * numCharsInSegmentWithDivider,
+        '4hUD': 4 * numCharsInSegmentWithDivider,
+        '4hUd': 5 * numCharsInSegmentWithDivider,
+        '4huD': 6 * numCharsInSegmentWithDivider,
+        '4hud': 7 * numCharsInSegmentWithDivider,
+        '2HuD': 8 * numCharsInSegmentWithDivider,
+        '2Hud': 9 * numCharsInSegmentWithDivider,
+        '2huD': 10 * numCharsInSegmentWithDivider,
+        '2hud': 11 * numCharsInSegmentWithDivider,
+        '1HuD': 12 * numCharsInSegmentWithDivider,
+        '1Hud': 13 * numCharsInSegmentWithDivider,
+        '1huD': 14 * numCharsInSegmentWithDivider,
+        '1hud': 15 * numCharsInSegmentWithDivider
     };
 
     // todo: Fill in the rest of this table.
@@ -143,21 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
         '57': 'H H S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '58': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '59': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '5X': 'S S S S S H H H UhUh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '5X': 'S S S S S H H H UhUh--....................--................H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '5A': 'H H DhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '66': 'PhPhPsPsPsH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '67': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '68': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '69': 'S S S S S H H H UhUh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '6X': 'S S S S S H H UhUhUh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '69': 'S S S S S H H H UhUh--....................--................H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '6X': 'S S S S S H H UhUhUh--....................--..............H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '6A': 'H DhDhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '77': 'PsPsPsPsPsPhH H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '78': 'S S S S S H H H UhUh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '79': 'S S S S S H H UhUhUh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '7X': 'S S S S S S S S S Us--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '78': 'S S S S S H H H UhUh--....................--................H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '79': 'S S S S S H H UhUhUh--....................--..............H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '7X': 'S S S S S S S S S Us--....................--..................S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '7A': 'DsDsDsDsDsS S H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '88': 'PsPsPsPsPsPhPhPhPhUp--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        '89': 'S S S S S S S S S Us--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '88': 'PsPsPsPsPsPhPhPhPhUp--....................--..................Ph--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
+        '89': 'S S S S S S S S S Us--....................--..................S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '8X': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '8A': 'S S S S DsS S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '99': 'PsPsPsPsPsS PsPsS S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
@@ -280,36 +282,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return ' background-color: ' + actionCodeColors[actionCode] + '; color: black;'
     }
 
-    function getCorrectPlayRowSegment(
-        correctPlayRow,
-        numDecks,
-        doesDealerHitSoft17,
-        isSurrenderOkay,
-        isDoubleAfterSplitOkay) {
-
-        const lookupKey = '' + numDecks
-            + (doesDealerHitSoft17 ? 'H' : 'h')
-            + (isSurrenderOkay ? 'U' : 'u')
-            + (isDoubleAfterSplitOkay ? 'D' : 'd');
-        const segmentOffset = correctPlaySegmentOffsets[lookupKey];
-        let finalSegment = correctPlayRow.substring(0, 21);
-        if (segmentOffset !== 0) {
-            const specificSegment = correctPlayRow.substring(
-                segmentOffset,
-                segmentOffset + segmentSize + 21);
-            for (let i = 0; i <= 20; i++) {
-                if (specificSegment[i] !== '.') {
-                    finalSegment[i] = specificSegment[i];
-                }
+    function mergeSegments(base, diff) {
+        let newBase = '';
+        for (let i = 0; i < numCharsInSegment; i++) {
+            if (diff[i] === '.') {
+                newBase += base[i];
+            } else {
+                newBase += diff[i];
             }
         }
-        return finalSegment;
+        return newBase;
+    }
+
+    function getCorrectPlayRowSegment(correctPlayRow, currentOptions) {
+        const lookupKey = '' + currentOptions.decks
+            + (currentOptions.isH17 ? 'H' : 'h')
+            + (currentOptions.canSur ? 'U' : 'u')
+            + (currentOptions.canDas ? 'D' : 'd');
+        const segmentOffset = correctPlaySegmentOffsets[lookupKey];
+        let finalSegment = correctPlayRow.substring(0, numCharsInSegment);
+        if (segmentOffset === 0) {
+            return finalSegment;
+        }
+        const specificSegment = correctPlayRow.substring(segmentOffset, segmentOffset + numCharsInSegment);
+        return mergeSegments(finalSegment, specificSegment);
     }
 
     function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment) {
-        const rowSegmentLength = 20; // 10 actions codes, each one 2 characters long.
         let result = '<tr><td>' + simplifiedHand + '</td>';
-        for (let i = 0; i < rowSegmentLength; i += 2) {
+        for (let i = 0; i < numCharsInSegment; i += 2) {
             const actionCode = correctPlayRowSegment[i] + correctPlayRowSegment[i + 1];
             result += '<td style="' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
         }
@@ -324,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return hand[1] === 'A';
     }
 
-    function displayCorrectPlays(numDecks, doesDealerHitSoft17, isSurrenderOkay, isDoubleAfterSplitOkay) {
+    function displayCorrectPlays(currentOptions) {
         let splitHandsSection = '';
         let softHandsSection = '';
 
@@ -333,12 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Walk through the correct plays, and create displayable rows for the table to display.
         for (const [hand, correctPlayRow] of Object.entries(correctPlays)) {
-            const correctPlayRowSegment = getCorrectPlayRowSegment(
-                correctPlayRow,
-                numDecks,
-                doesDealerHitSoft17,
-                isSurrenderOkay,
-                isDoubleAfterSplitOkay);
+            const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
             if (isHandSplittable(hand)) {
                 splitHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment);
             } else {
@@ -471,25 +467,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getActionCodeFromCorrectPlays(correctPlayRow, dealerCard) {
-        const numCharsInActionCode = 2;
-        const i = cardIndexes[dealerCard] * numCharsInActionCode;
+        const i = cardIndexes[dealerCard] * charsPerActionCode;
         return correctPlayRow[i] + correctPlayRow[i + 1];
     }
 
-    function lookupCorrectActionCode(
-        dealerCard,
-        hand,
-        numDecks,
-        doesDealerHitSoft17,
-        isSurrenderOkay,
-        isDoubleAfterSplitOkay) {
+    function lookupCorrectActionCode(dealerCard, hand, currentOptions) {
         const correctPlayRow = correctPlays[hand[0] + hand[1]];
-        const correctPlayRowSegment = getCorrectPlayRowSegment(
-            correctPlayRow,
-            numDecks,
-            doesDealerHitSoft17,
-            isSurrenderOkay,
-            isDoubleAfterSplitOkay);
+        const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
         return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
     }
 
@@ -543,26 +527,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function checkDoesDealerHitSoft17(selectedValue) {
-        return selectedValue === 'H17';
+    function getCurrentOptions() {
+        return {
+            decks: getNumDecks(decksSelect.value),
+            isH17: soft17Select.value === 'H17',
+            canSur: surrenderPermittedCheckbox.checked,
+            canDas: dasPermittedCheckbox.checked
+        }
     }
 
     function handleAction(action) {
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
         const isHardMode = hardModeCheckbox.checked;
-        const numDecks = getNumDecks(decksSelect.value);
-        const doesDealerHitSoft17 = checkDoesDealerHitSoft17(soft17Select.value);
-        const isSurrenderOkay = surrenderPermittedCheckbox.checked;
-        const isDoubleAfterSplitOkay = dasPermittedCheckbox.checked;
 
-        const correctPlayCode = lookupCorrectActionCode(
-            dealerCard,
-            hand,
-            numDecks,
-            doesDealerHitSoft17,
-            isSurrenderOkay,
-            isDoubleAfterSplitOkay);
+        const currentOptions = getCurrentOptions();
+        const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions);
         const chosenAction = actionCodesByAction[action];
         if (chosenAction === correctPlayCode) {
             playWasCorrect(chosenAction);
@@ -575,13 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showScore();
-
-        displayCorrectPlays(
-            numDecks,
-            doesDealerHitSoft17,
-            isSurrenderOkay,
-            isDoubleAfterSplitOkay);
-
+        displayCorrectPlays(currentOptions);
         deal(isHardMode);
     }
 
@@ -605,6 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'soft17':
                 break;
         }
+        displayCorrectPlays(getCurrentOptions());
     }
 
     function initialSetup() {
@@ -634,17 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
 
         showScore();
-
-        const numDecks = getNumDecks(decksSelect.value);
-        const doesDealerHitSoft17 = checkDoesDealerHitSoft17(soft17Select.value);
-        const isSurrenderOkay = surrenderPermittedCheckbox.checked;
-        const isDoubleAfterSplitOkay = dasPermittedCheckbox.checked;
-        displayCorrectPlays(
-            numDecks,
-            doesDealerHitSoft17,
-            isSurrenderOkay,
-            isDoubleAfterSplitOkay);
-
+        displayCorrectPlays(getCurrentOptions());
         showTableKey();
         deal(hardModeCheckbox.checked);
     }
