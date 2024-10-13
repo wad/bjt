@@ -35,6 +35,15 @@ button:disabled {
     cursor: not-allowed;
 }
 
+#resultPending {
+    margin-top: 20px;
+    font-size: 18px;
+    padding: 10px; /* Add some padding to create space inside the box */
+    background-color: grey; /* Set the background color to pink */
+    border: 1px solid #000; /* Optionally, add a border to distinguish the box */
+    color: black; /* Set the font color to black */
+}
+
 #resultSuccess {
     margin-top: 20px;
     font-size: 18px;

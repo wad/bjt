@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerCard1TextDiv = document.getElementById('player-card-1-text');
     const playerCard2Div = document.getElementById('player-card-2');
     const playerCard2TextDiv = document.getElementById('player-card-2-text');
+    const resultPendingDiv = document.getElementById('resultPending');
     const resultSuccessDiv = document.getElementById('resultSuccess');
     const resultCloseDiv = document.getElementById('resultClose');
     const resultFailureDiv = document.getElementById('resultFailure');
-    const resultDescriptionDiv = document.getElementById('resultDescription');
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
     const tableKeyDiv = document.getElementById('tableKey');
@@ -507,39 +507,46 @@ document.addEventListener('DOMContentLoaded', () => {
         return chosenPlay[0] === correctPlay[0];
     }
 
-    function updatePlayResult(wasSuccess, wasFailure, wasClose) {
-        resultSuccessDiv.innerText = wasSuccess ? 'Correct' : '';
+    function updatePlayResult(wasSuccess, wasFailure, wasClose, message) {
+        if (!wasSuccess && !wasFailure && !wasClose) {
+            resultPendingDiv.style.display = '';
+            resultPendingDiv.innerText = 'Click a play button, and check here for the result.';
+        } else {
+            resultPendingDiv.style.display = 'none';
+            resultPendingDiv.innerText = '';
+        }
+        resultSuccessDiv.innerText = wasSuccess ? message : '';
         resultSuccessDiv.style.display = wasSuccess ? '' : 'none';
-        resultFailureDiv.innerText = wasFailure ? 'Wrong play' : '';
+        resultFailureDiv.innerText = wasFailure ? message : '';
         resultFailureDiv.style.display = wasFailure ? '' : 'none';
-        resultCloseDiv.innerText = wasClose ? 'Almost correct!' : '';
+        resultCloseDiv.innerText = wasClose ? message : '';
         resultCloseDiv.style.display = wasClose ? '' : 'none';
     }
 
     function playWasCorrect(chosenAction) {
         numCorrect++;
-        updatePlayResult(true, false, false);
-        resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = 'Correct! ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
+        updatePlayResult(true, false, false, message);
     }
 
     function playWasAlmostCorrect(chosenAction, correctPlayCode) {
         numAlmostCorrect++;
-        updatePlayResult(false, false, true);
-        resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = 'Almost right. ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
-            + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+            + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+        updatePlayResult(false, false, true, message);
     }
 
     function playWasIncorrect(chosenAction, correctPlayCode) {
         numIncorrect++;
-        updatePlayResult(false, true, false);
-        resultDescriptionDiv.innerText = playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = 'Oops. ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
-            + '", but the correct play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+            + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
+        updatePlayResult(false, true, false, message);
     }
 
     function getNumDecks(selectedValue) {
@@ -624,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialSetup() {
 
         // Clear out anything in the play result area
-        updatePlayResult(false, false, false);
+        updatePlayResult(false, false, false, '');
 
         // default options
         decksSelect.value = '4,6,8-deck';
