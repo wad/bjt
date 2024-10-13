@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackjack Trainer</title>
+    <title>BlackjackPrep.com</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <h1>BlackjackPrep.com</h1>
-<p>Prepare for your next casino night with our blackjack <a
-        href="https://en.wikipedia.org/wiki/Blackjack#Basic_strategy">basic strategy</a> trainer!</p>
+<p>
+    Practice making strong plays with our blackjack <a
+        href="https://en.wikipedia.org/wiki/Blackjack#Basic_strategy">basic strategy</a> game!
+</p>
 <div id="game">
     <div id="dealer-card-text" hidden=""></div>
     <div id="player-card-1-text" hidden=""></div>
@@ -31,22 +33,22 @@
             <button id="buttonStand" style="width: 200px;">Stand</button>
         </div>
         <div>
+            <button id="buttonDouble">Double Down</button>
             <button id="buttonDoubleHit">Double Down (or hit)</button>
             <button id="buttonDoubleStand">Double Down (or stand)</button>
         </div>
         <div>
+            <button id="buttonSplit">Split</button>
             <button id="buttonSplitHit">Split (or hit)</button>
             <button id="buttonSplitStand">Split (or stand)</button>
             <button id="buttonSplitDoubleHit">Split (or double down (or hit))</button>
         </div>
         <div>
+            <button id="buttonSurrender">Surrender</button>
             <button id="buttonSurrenderHit">Surrender (or hit)</button>
             <button id="buttonSurrenderStand">Surrender (or stand)</button>
             <button id="buttonSurrenderSplit">Surrender (or split)</button>
         </div>
-        <p class="small-text"><i>(Why are some of these actions so complicated?
-            We're only showing two cards for the player's hand, but there could be more, and they could
-            be after multiple splits, etc.)</i></p>
     </div>
     <div>
         <div id="resultPending"></div>
@@ -59,9 +61,7 @@
     <div>
         <hr>
         <p>
-            Different tables have different rules.<br>
-            You'll win more often when the rules are in the player's favor.<br>
-            But you'll do the best when you make strong plays!
+            Customize the rules of the game to your taste here.
         </p>
     </div>
     <div>
@@ -69,25 +69,24 @@
         <select id="decks" name="decks">
             <option value="1-deck">1</option>
             <option value="2-deck">2</option>
-            <option value="4,6,8-deck">4, 6, or 8 (default)</option>
+            <option value="4,6,8-deck">4, 6, or 8</option>
         </select>
     </div>
     <div>
         <label for="soft17">Soft 17 Rule:</label>
         <select id="soft17" name="soft17">
-            <option value="H17">H17: dealer hits on ace and six (default)</option>
-            <option value="S17">S17: dealer stands on ace and six (favors the player)</option>
+            <option value="H17">H17: dealer hits on ace and six</option>
+            <option value="S17">S17: dealer stands on ace and six</option>
         </select>
     </div>
     <div style="display: flex; align-items: center;">
         <label for="surrenderPermitted" style="margin-right: 10px;">Surrender Permitted:</label>
         <input type="checkbox" id="surrenderPermitted" name="surrenderPermitted">
-        <p class="small-text"><i>(Favors the player. Only supported for 4+ decks.)</i></p>
+        <p class="small-text"><i>(Only supported for 4 or more decks.)</i></p>
     </div>
     <div style="display: flex; align-items: center;">
         <label for="doubleAfterSplitPermitted" style="margin-right: 10px;">Double-down after split permitted:</label>
         <input type="checkbox" id="doubleAfterSplitPermitted" name="doubleAfterSplitPermitted" checked>
-        <p class="small-text"><i>(Favors the player.)</i></p>
     </div>
     <div>
         <hr>
@@ -107,17 +106,23 @@
     <div style="display: flex; align-items: center;">
         <label for="hardMode" style="margin-right: 10px;">Hard mode:</label>
         <input type="checkbox" id="hardMode" name="hardMode">
-        <p class="small-text"><i>(You get mostly tricky situations!)</i></p>
+        <p class="small-text"><i>(More options, and more of the tricky hands.)</i></p>
     </div>
     <div>
         <hr>
         <p>
-            Did our app help you win a hand?<br>
             Did you notice that our free app has no ads?<br>
-            <a href="https://venmo.com/Tressa-Wadsworth">Venmo us</a> the minimum bet at your favorite table, stay ad-free!
+            <a href="https://venmo.com/Tressa-Wadsworth">Venmo us</a> a tip, stay ad-free!
         </p>
-        <a href="https://venmo.com/Tressa-Wadsworth" target="_blank"><img src="venmo.jpg" alt="venmo" width="200" height="200"></a>
+        <a href="https://venmo.com/Tressa-Wadsworth" target="_blank"><img src="venmo.jpg" alt="venmo" width="200"
+                                                                          height="200"></a>
     </div>
+</div>
+<div>
+    <p><i>
+        This page is for entertainment only, we are not responsible for any use people may make of it.<br>
+        Find a bug? Like this app? Let us know! <a href="mailto:tressawad+bjp@gmail.com">tressawad+bjp@gmail.com</a>
+    </i></p>
 </div>
 <script src="script.js"></script>
 </body>

@@ -20,6 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const hardModeCheckbox = document.getElementById('hardMode');
     const reverseTableCheckbox = document.getElementById('reverseTable');
 
+    const doubleButton = document.getElementById('buttonDouble');
+    const doubleHitButton = document.getElementById('buttonDoubleHit');
+    const doubleStandButton = document.getElementById('buttonDoubleStand');
+    const splitButton = document.getElementById('buttonSplit');
+    const splitHitButton = document.getElementById('buttonSplitHit');
+    const splitStandButton = document.getElementById('buttonSplitStand');
+    const splitDoubleHitButton = document.getElementById('buttonSplitDoubleHit');
+
+    const surrenderButton = document.getElementById('buttonSurrender');
     const surrenderHitButton = document.getElementById('buttonSurrenderHit');
     const surrenderStandButton = document.getElementById('buttonSurrenderStand');
     const surrenderSplitButton = document.getElementById('buttonSurrenderSplit');
@@ -48,11 +57,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionCodesByAction = {
         'buttonHit': 'H ',
         'buttonStand': 'S ',
+        'buttonDouble': 'D ',
         'buttonDoubleHit': 'Dh',
         'buttonDoubleStand': 'Ds',
+        'buttonSplit': 'P ',
         'buttonSplitHit': 'Ph',
         'buttonSplitStand': 'Ps',
         'buttonSplitDoubleHit': 'Pd',
+        'buttonSurrender': 'U ',
         'buttonSurrenderHit': 'Uh',
         'buttonSurrenderStand': 'Us',
         'buttonSurrenderSplit': 'Up'
@@ -61,25 +73,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const actionNamesByActionCode = {
         'H ': 'Hit',
         'S ': 'Stand',
+        'D ': 'Double down',
         'Dh': 'Double down (or hit)',
         'Ds': 'Double down (or stand)',
+        'P ': 'Split',
         'Ph': 'Split (or hit)',
         'Ps': 'Split (or stand)',
         'Pd': 'Split (or double down (or hit))',
+        'U ': 'Surrender',
         'Uh': 'Surrender (or hit)',
         'Us': 'Surrender (or stand)',
         'Up': 'Surrender (or split)'
+    };
+
+    const actionCodeIsForHardMode = {
+        'H ': true,
+        'S ': true,
+        'D ': false,
+        'Dh': true,
+        'Ds': true,
+        'P ': false,
+        'Ph': true,
+        'Ps': true,
+        'Pd': true,
+        'U ': false,
+        'Uh': true,
+        'Us': true,
+        'Up': true
+    };
+
+    const actionCodeIsForNonHardMode = {
+        'H ': true,
+        'S ': true,
+        'D ': true,
+        'Dh': false,
+        'Ds': false,
+        'P ': true,
+        'Ph': false,
+        'Ps': false,
+        'Pd': false,
+        'U ': true,
+        'Uh': false,
+        'Us': false,
+        'Up': false
     };
 
     const charsPerActionCode = 2;
     const actionCodeColors = {
         'H ': '#28b463',
         'S ': '#e74c3c',
+        'D ': '#85c1e9',
         'Dh': '#85c1e9',
         'Ds': '#5dade2',
+        'P ': '#f9e79f',
         'Ph': '#f9e79f',
         'Ps': '#f4d03f',
         'Pd': '#d4ac0d',
+        'U ': '#e5e7e9',
         'Uh': '#e5e7e9',
         'Us': '#bdc3c7',
         'Up': '#85929e'
@@ -106,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         '1hud': 15 * numCharsInSegmentWithDivider
     };
 
-    // todo: Fill in the rest of this table.
     // The keys of this object are the two player cards, standardized, in ascending value order.
     // Each two characters in the associated strings corresponds to an action code, "--", or "..".
     // The position of these two-character codes indicates the associated dealer card, within each segment.
@@ -115,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // The value ".." (two dots) means "use the default correct play".
     // The default correct play is the first segment, the leftmost 20 characters of each string,
     // corresponding to options: 4 or more decks, H17, surrender is available, double after split is available.
-    const correctPlays = { //                                                                                                                                                                 ooooooooooo           ooooooooo          oooooooooooooooo        oooooooooo                                                                                                                                       ################
+    const correctPlays = {
         //     468,H17,SUR,DS        468,H17,SUR,nDS       468,H17,nSUR,DS       468,H17,nSUR,nDS      468,S17,SUR,DS        468,S17,SUR,nDS       468,S17,nSUR,DS       468,S17,nSUR,nDS      2,H17,nSUR,DS         2,H17,nSUR,nDS        2,S17,nSUR,DS         2,S17,nSUR,nDS        1,H17,nSUR,DS         1,H17,nSUR,nDS        1,S17,nSUR,DS         1,S17,nSUR,nDS
         //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
         '22': 'PhPhPhPhPhPhH H H H --H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H ..................--....................--H ..................--....................--H ..................--....................--H ..................',
@@ -145,9 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         '49': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '4X': 'S S S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '4A': 'H H DhDhDhH H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
-        //                                                                                                                                                                                                                                                                                                                                                                                   ################
-        //     468,H17,SUR,DS        468,H17,SUR,nDS       468,H17,nSUR,DS       468,H17,nSUR,nDS      468,S17,SUR,DS        468,S17,SUR,nDS       468,S17,nSUR,DS       468,S17,nSUR,nDS      2,H17,nSUR,DS         2,H17,nSUR,nDS        2,S17,nSUR,DS         2,S17,nSUR,nDS        1,H17,nSUR,DS         1,H17,nSUR,nDS        1,S17,nSUR,DS         1,S17,nSUR,nDS
-        //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
         '55': 'DhDhDhDhDhDhDhDhH H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         '56': 'DhDhDhDhDhDhDhDhDhDh--....................--....................--....................--..................H --..................H --..................H --..................H --....................--....................--....................--....................--....................--....................--....................--....................',
         '57': 'H H S S S H H H H H --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
@@ -259,6 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'cards/' + card + suite + '.png';
     }
 
+    function convertActionCodeForNonHardMode(actionCode) {
+        return actionCode[0] + ' ';
+    }
+
     function sortHand(hand) {
         if (cardIndexes[hand[0]] > cardIndexes[hand[1]]) {
             return [hand[1], hand[0]];
@@ -316,11 +366,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return mergeSegments(finalSegment, specificSegment);
     }
 
-    function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment) {
+    function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment, isHardMode) {
         let result = '<tr><td>' + simplifiedHand + '</td>';
         for (let i = 0; i < numCharsInSegment; i += 2) {
             const actionCode = correctPlayRowSegment[i] + correctPlayRowSegment[i + 1];
-            result += '<td style="' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
+            if (isHardMode) {
+                result += '<td style="' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
+            } else {
+                const nonHardModeActionCode = convertActionCodeForNonHardMode(actionCode);
+                result += '<td style="' + getCellColorHtml(nonHardModeActionCode) + '">' + nonHardModeActionCode + '</td>'
+            }
         }
         return result + '</tr>';
     }
@@ -349,14 +404,14 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const [hand, correctPlayRow] of entries) {
             const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
             if (isHandSplittable(hand)) {
-                splitHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment);
+                splitHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment, currentOptions.isHardMode);
             } else {
                 if (isHandSoft(hand)) {
-                    softHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment);
+                    softHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment, currentOptions.isHardMode);
                 } else {
                     let sum = sumCardValues(hand);
                     if (!hardHandsMap.has(sum)) {
-                        hardHandsMap.set(sum, convertCorrectPlayRowForDisplay(sum, correctPlayRowSegment));
+                        hardHandsMap.set(sum, convertCorrectPlayRowForDisplay(sum, correctPlayRowSegment, currentOptions.isHardMode));
                     }
                 }
             }
@@ -391,12 +446,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableKey = Object.entries(actionNamesByActionCode);
         let table = '<table border="1">';
         for (let [actionCode, actionCodeMeaning] of tableKey) {
-            let isSurrender = actionCode[0] === 'U';
-            if (!isSurrender || (isSurrender && currentOptions.canSur)) {
-                table += '<tr>'
-                    + '<td style="text-align: left;' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
-                    + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
-                    + '</tr>';
+            const shouldShowEntry = (currentOptions.isHardMode && actionCodeIsForHardMode[actionCode])
+                || (!currentOptions.isHardMode && actionCodeIsForNonHardMode[actionCode]);
+            if (shouldShowEntry) {
+                let isSurrender = actionCode[0] === 'U';
+                if (!isSurrender || (isSurrender && currentOptions.canSur)) {
+                    table += '<tr>'
+                        + '<td style="text-align: left;' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
+                        + '<td style="text-align: left;">' + actionCodeMeaning + '</td>'
+                        + '</tr>';
+                }
             }
         }
         tableKeyDiv.innerHTML = table + '</table>';
@@ -503,8 +562,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
     }
 
-    function wasPlayAlmostCorrect(chosenPlay, correctPlay) {
-        return chosenPlay[0] === correctPlay[0];
+    function wasPlayAlmostCorrect(chosenActionCode, correctActionCode) {
+        return chosenActionCode[0] === correctActionCode[0];
+    }
+
+    function wasPlayCorrect(chosenActionCode, correctActionCode, isHardMode) {
+        if (!isHardMode) {
+            return wasPlayAlmostCorrect(chosenActionCode, correctActionCode);
+        }
+        return chosenActionCode === correctActionCode;
     }
 
     function updatePlayResult(wasSuccess, wasFailure, wasClose, message) {
@@ -523,8 +589,11 @@ document.addEventListener('DOMContentLoaded', () => {
         resultCloseDiv.style.display = wasClose ? '' : 'none';
     }
 
-    function playWasCorrect(chosenAction) {
+    function playWasCorrect(chosenAction, isHardMode) {
         numCorrect++;
+        if (!isHardMode) {
+            chosenAction = convertActionCodeForNonHardMode(chosenAction);
+        }
         const message = 'Correct! ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
@@ -566,15 +635,34 @@ document.addEventListener('DOMContentLoaded', () => {
             isH17: soft17Select.value === 'H17',
             canSur: surrenderPermittedCheckbox.checked,
             canDas: dasPermittedCheckbox.checked,
-            reversed: reverseTableCheckbox.checked
+            reversed: reverseTableCheckbox.checked,
+            isHardMode: hardModeCheckbox.checked
         }
     }
 
-    function updateSurrenderButtons(currentOptions) {
+    function updateButtons(currentOptions) {
         const showSurrenderButtons = currentOptions.canSur;
-        surrenderHitButton.hidden = !showSurrenderButtons;
-        surrenderStandButton.hidden = !showSurrenderButtons;
-        surrenderSplitButton.hidden = !showSurrenderButtons;
+        const isHardMode = currentOptions.isHardMode;
+
+        doubleButton.hidden = isHardMode;
+        doubleHitButton.hidden = !isHardMode;
+        doubleStandButton.hidden = !isHardMode;
+        splitButton.hidden = isHardMode;
+        splitHitButton.hidden = !isHardMode;
+        splitStandButton.hidden = !isHardMode;
+        splitDoubleHitButton.hidden = !isHardMode;
+
+        if (isHardMode) {
+            surrenderButton.hidden = true;
+            surrenderHitButton.hidden = !showSurrenderButtons;
+            surrenderStandButton.hidden = !showSurrenderButtons;
+            surrenderSplitButton.hidden = !showSurrenderButtons;
+        } else {
+            surrenderButton.hidden = !showSurrenderButtons;
+            surrenderHitButton.hidden = true;
+            surrenderStandButton.hidden = true;
+            surrenderSplitButton.hidden = true;
+        }
     }
 
     function handleAction(action) {
@@ -585,8 +673,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentOptions = getCurrentOptions();
         const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions);
         const chosenAction = actionCodesByAction[action];
-        if (chosenAction === correctPlayCode) {
-            playWasCorrect(chosenAction);
+        if (wasPlayCorrect(chosenAction, correctPlayCode, isHardMode)) {
+            playWasCorrect(chosenAction, isHardMode);
         } else {
             if (wasPlayAlmostCorrect(chosenAction, correctPlayCode)) {
                 playWasAlmostCorrect(chosenAction, correctPlayCode);
@@ -597,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showScore();
         displayCorrectPlays(currentOptions);
-        updateSurrenderButtons(currentOptions);
+        updateButtons(currentOptions);
         deal(isHardMode);
     }
 
@@ -624,13 +712,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
         const currentOptions = getCurrentOptions();
-        updateSurrenderButtons(currentOptions);
+        updateButtons(currentOptions);
         displayCorrectPlays(currentOptions);
     }
 
     function initialSetup() {
 
-        // Clear out anything in the play result area
+        // Initialize the play result area
         updatePlayResult(false, false, false, '');
 
         // default options
@@ -660,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showScore();
         displayCorrectPlays(currentOptions);
-        updateSurrenderButtons(currentOptions);
+        updateButtons(currentOptions);
         deal(hardModeCheckbox.checked);
     }
 

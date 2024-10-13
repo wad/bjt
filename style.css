@@ -30,11 +30,6 @@ button {
     border-radius: 5px;
 }
 
-button:disabled {
-    background-color: #888888;
-    cursor: not-allowed;
-}
-
 #resultPending {
     margin-top: 20px;
     font-size: 18px;
