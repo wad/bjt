@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             + (currentOptions.isH17 ? 'H' : 'h')
             + (currentOptions.canSur ? 'U' : 'u')
             + (currentOptions.canDas ? 'D' : 'd')
-            + (currentOptions.canDas ? 'a' : 'A');
+            + (isAlt ? 'A' : 'a');
         const segmentOffset = correctPlaySegmentOffsets[lookupKey];
         let finalSegment = correctPlayRow.substring(0, numCharsInSegment);
         if (segmentOffset === 0) {
@@ -438,6 +438,12 @@ document.addEventListener('DOMContentLoaded', () => {
             + '<tdr><td style="text-align: left;" id="HH">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
 
         showTableKey(currentOptions);
+
+        document.getElementById('HH').addEventListener('click', function () {
+            showAltRequested = !showAltRequested;
+            console.log('value is now ' + showAltRequested);
+            displayCorrectPlays(currentOptions, showAltRequested);
+        });
     }
 
     function showTableKey(currentOptions) {
@@ -770,20 +776,16 @@ document.addEventListener('DOMContentLoaded', () => {
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
         reverseTableCheckbox.addEventListener('change', handleOptionChanged);
 
-        // alt action event handler
-        dealerCardDiv.addEventListener('click', function () {
-            altActionRequested = true;
-        });
-        document.getElementById('HH').addEventListener('click', function () {
-            showAltRequested = !showAltRequested;
-            displayCorrectPlays(getCurrentOptions(), showAltRequested);
-        });
         const currentOptions = getCurrentOptions();
-
         showScore();
         displayCorrectPlays(currentOptions, false);
         updateButtons(currentOptions);
         deal(hardModeCheckbox.checked);
+
+        // alt action event handler
+        dealerCardDiv.addEventListener('click', function () {
+            altActionRequested = !altActionRequested;
+        });
     }
 
     initialSetup();
