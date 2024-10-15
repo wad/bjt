@@ -294,6 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let numCorrect = 0;
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
+    let altActionRequested = false;
+    let alt = null;
 
     // Returns an integer >= 0 and < max
     function getRandomInteger(max) {
@@ -352,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return newBase;
     }
 
-    function getCorrectPlayRowSegment(correctPlayRow, currentOptions) {
+    function getCorrectPlayRowSegment(correctPlayRow, currentOptions, isAlt) {
         const lookupKey = '' + currentOptions.decks
             + (currentOptions.isH17 ? 'H' : 'h')
             + (currentOptions.canSur ? 'U' : 'u')
@@ -556,9 +558,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return correctPlayRow[i] + correctPlayRow[i + 1];
     }
 
-    function lookupCorrectActionCode(dealerCard, hand, currentOptions) {
+    function lookupCorrectActionCode(dealerCard, hand, currentOptions, isAlt) {
         const correctPlayRow = correctPlays[hand[0] + hand[1]];
-        const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
+        const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions, isAlt);
         return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
     }
 
@@ -589,29 +591,37 @@ document.addEventListener('DOMContentLoaded', () => {
         resultCloseDiv.style.display = wasClose ? '' : 'none';
     }
 
-    function playWasCorrect(chosenAction, isHardMode) {
+    function adjustResponse(word, altPlayWasCorrect) {
+        return altPlayWasCorrect == null ? word : (altPlayWasCorrect ? word.toUpperCase() : word.toLowerCase());
+    }
+
+    function playWasCorrect(chosenAction, isHardMode, altWasCorrect) {
         numCorrect++;
         if (!isHardMode) {
             chosenAction = convertActionCodeForNonHardMode(chosenAction);
         }
-        const message = 'Correct! ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+
+        const message = adjustResponse('Correct! ', altWasCorrect) + playerCard1TextDiv.textContent
+            + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
         updatePlayResult(true, false, false, message);
     }
 
-    function playWasAlmostCorrect(chosenAction, correctPlayCode) {
+    function playWasAlmostCorrect(chosenAction, correctPlayCode, altWasCorrect) {
         numAlmostCorrect++;
-        const message = 'Almost right. ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = adjustResponse('Almost right. ', altWasCorrect) + playerCard1TextDiv.textContent
+            + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
             + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
         updatePlayResult(false, false, true, message);
     }
 
-    function playWasIncorrect(chosenAction, correctPlayCode) {
+    function playWasIncorrect(chosenAction, correctPlayCode, altWasCorrect) {
         numIncorrect++;
-        const message = 'Oops. ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = adjustResponse('Oops. ', altWasCorrect) + playerCard1TextDiv.textContent
+            + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
             + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
@@ -666,20 +676,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAction(action) {
+
+        if (altActionRequested) {
+            alt = action;
+            altActionRequested = false;
+            return;
+        }
+
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
         const isHardMode = hardModeCheckbox.checked;
 
         const currentOptions = getCurrentOptions();
-        const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions);
+
+        let altCorrectPlayCode = null;
+        let altChosenAction = null;
+        let altPlayWasCorrect = null;
+        if (alt != null) {
+            altCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
+            altChosenAction = actionCodesByAction[alt];
+            altPlayWasCorrect = wasPlayCorrect(altChosenAction, altCorrectPlayCode, isHardMode);
+        }
+
+        const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, false);
         const chosenAction = actionCodesByAction[action];
         if (wasPlayCorrect(chosenAction, correctPlayCode, isHardMode)) {
-            playWasCorrect(chosenAction, isHardMode);
+            playWasCorrect(chosenAction, isHardMode, altPlayWasCorrect);
         } else {
-            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode)) {
+            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode, altPlayWasCorrect)) {
                 playWasAlmostCorrect(chosenAction, correctPlayCode);
             } else {
-                playWasIncorrect(chosenAction, correctPlayCode);
+                playWasIncorrect(chosenAction, correctPlayCode, altPlayWasCorrect);
             }
         }
 
@@ -687,6 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayCorrectPlays(currentOptions);
         updateButtons(currentOptions);
         deal(isHardMode);
+        alt = null;
     }
 
     function handleOptionChanged(event) {
@@ -714,6 +742,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentOptions = getCurrentOptions();
         updateButtons(currentOptions);
         displayCorrectPlays(currentOptions);
+        altActionRequested = false;
+        alt = null;
     }
 
     function initialSetup() {
@@ -743,6 +773,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dasPermittedCheckbox.addEventListener('change', handleOptionChanged);
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
         reverseTableCheckbox.addEventListener('change', handleOptionChanged);
+
+        // alt action event handler
+        dealerCardDiv.addEventListener('click', function () {
+            altActionRequested = true;
+        });
 
         const currentOptions = getCurrentOptions();
 
