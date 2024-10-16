@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultSuccessDiv = document.getElementById('resultSuccess');
     const resultCloseDiv = document.getElementById('resultClose');
     const resultFailureDiv = document.getElementById('resultFailure');
+    const resultBoldSuccessDiv = document.getElementById('resultBoldSuccess');
+    const resultBoldFailureDiv = document.getElementById('resultBoldFailure');
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
     const tableKeyDiv = document.getElementById('tableKey');
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
     const hardModeCheckbox = document.getElementById('hardMode');
     const reverseTableCheckbox = document.getElementById('reverseTable');
+    const correctPlaysTitle = document.getElementById('correctPlays');
 
     const doubleButton = document.getElementById('buttonDouble');
     const doubleHitButton = document.getElementById('buttonDoubleHit');
@@ -211,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'AA': 'PhPhPsPsPdPhPhPhPhPh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................'
     };
 
-    const altPlays = {
+    const boldPlays = {
         //     2,4,6,8               1
         //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
         '22': '....................--....................',
@@ -247,7 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
         '58': '....................--S S ................',
         '59': '................Uh..--................Uh..',
         '5X': '..............UhS Uh--..............UhS Uh',
-        //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
         '5A': '....................--....................',
         '66': 'PsPsPs..............--PsPsPs..............',
         '67': '....................--S S ................',
@@ -342,9 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let numCorrect = 0;
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
-    let altActionRequested = false;
-    let alt = null;
-    let showAltRequested = false;
+    let boldActionRequested = false;
+    let boldAction = null;
+    let showBoldRequested = false;
 
     // Returns an integer >= 0 and < max
     function getRandomInteger(max) {
@@ -403,15 +405,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return newBase;
     }
 
-    function getAltSegment(altPlayRow, isSingleDeck) {
+    function getBoldSegment(boldPlayRow, isSingleDeck) {
         if (isSingleDeck) {
-            return altPlayRow.substring(segLen, segLen + numCharsInSegment);
+            return boldPlayRow.substring(segLen, segLen + numCharsInSegment);
         } else {
-            return altPlayRow.substring(0, numCharsInSegment);
+            return boldPlayRow.substring(0, numCharsInSegment);
         }
     }
 
-    function getCorrectPlayRowSegment(correctPlayRow, altPlayRow, currentOptions, isAlt) {
+    function getCorrectPlayRowSegment(correctPlayRow, boldPlayRow, currentOptions, isBold) {
         const lookupKey = '' + currentOptions.decks
             + (currentOptions.isH17 ? 'H' : 'h')
             + (currentOptions.canSur ? 'U' : 'u')
@@ -425,10 +427,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const specificSegment = correctPlayRow.substring(segmentOffset, segmentOffset + numCharsInSegment);
             finalSegment = mergeSegments(defaultSegment, specificSegment);
         }
-        if (isAlt) {
+        if (isBold) {
             finalSegment = mergeSegments(
                 defaultSegment,
-                getAltSegment(altPlayRow, currentOptions.decks === '1'));
+                getBoldSegment(boldPlayRow, currentOptions.decks === '1'));
         }
         return finalSegment;
     }
@@ -455,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return hand[1] === 'A';
     }
 
-    function displayCorrectPlays(currentOptions, showAlt) {
+    function displayCorrectPlays(currentOptions, showBold) {
         let splitHandsSection = '';
         let softHandsSection = '';
 
@@ -471,9 +473,9 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const [handCards, correctPlayRow] of entries) {
             const correctPlayRowSegment = getCorrectPlayRowSegment(
                 correctPlayRow,
-                altPlays[handCards],
+                boldPlays[handCards],
                 currentOptions,
-                showAlt);
+                showBold);
             if (isHandSplittable(handCards)) {
                 splitHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isHardMode);
             } else {
@@ -506,16 +508,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const dealerCardHeader = '<td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>A</td>';
-        tableDiv.innerHTML = '<table border="1" id="PH"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHandsSection
-            + '<tr><td style="text-align: left;" id="SH">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHandsSection
-            + '<tdr><td style="text-align: left;" id="HH">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
+        tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHandsSection
+            + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHandsSection
+            + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
+
+        if (showBold) {
+            correctPlaysTitle.innerText = 'Bold Plays:';
+        } else {
+            correctPlaysTitle.innerText = 'Correct Plays:';
+        }
 
         showTableKey(currentOptions);
-
-        document.getElementById('HH').addEventListener('click', function () {
-            showAltRequested = !showAltRequested;
-            displayCorrectPlays(currentOptions, showAltRequested);
-        });
     }
 
     function showTableKey(currentOptions) {
@@ -632,13 +635,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return correctPlayRow[i] + correctPlayRow[i + 1];
     }
 
-    function lookupCorrectActionCode(dealerCard, hand, currentOptions, isAlt) {
+    function lookupCorrectActionCode(dealerCard, hand, currentOptions, isBold) {
         const handCards = hand[0] + hand[1];
         const correctPlayRowSegment = getCorrectPlayRowSegment(
             correctPlays[handCards],
-            altPlays[handCards],
+            boldPlays[handCards],
             currentOptions,
-            isAlt);
+            isBold);
         return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
     }
 
@@ -669,26 +672,44 @@ document.addEventListener('DOMContentLoaded', () => {
         resultCloseDiv.style.display = wasClose ? '' : 'none';
     }
 
-    function adjustResponse(word, altPlayWasCorrect) {
-        return altPlayWasCorrect == null ? word : (altPlayWasCorrect ? word.toUpperCase() : word.toLowerCase());
+    function updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode) {
+        if (boldPlayWasCorrect == null) {
+            resultBoldSuccessDiv.innerText = '';
+            resultBoldSuccessDiv.style.display = 'none';
+            resultBoldFailureDiv.innerText = '';
+            resultBoldFailureDiv.style.display = 'none';
+        } else {
+            if (boldPlayWasCorrect) {
+                resultBoldSuccessDiv.innerText = 'Bold play was correct! You chose: ' + actionNamesByActionCode[boldChosenAction];
+                resultBoldSuccessDiv.style.display = '';
+                resultBoldFailureDiv.innerText = '';
+                resultBoldFailureDiv.style.display = 'none';
+            } else {
+                resultBoldSuccessDiv.innerText = '';
+                resultBoldSuccessDiv.style.display = 'none';
+                resultBoldFailureDiv.innerText = 'Bold play was incorrect. You chose ' + actionNamesByActionCode[boldChosenAction]
+                    + ' but the correct one was ' + actionNamesByActionCode[boldCorrectPlayCode] + '.';
+                resultBoldFailureDiv.style.display = '';
+            }
+        }
     }
 
-    function playWasCorrect(chosenAction, isHardMode, altWasCorrect) {
+    function playWasCorrect(chosenAction, isHardMode) {
         numCorrect++;
         if (!isHardMode) {
             chosenAction = convertActionCodeForNonHardMode(chosenAction);
         }
 
-        const message = adjustResponse('Correct! ', altWasCorrect) + playerCard1TextDiv.textContent
+        const message = 'Correct! ' + playerCard1TextDiv.textContent
             + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
         updatePlayResult(true, false, false, message);
     }
 
-    function playWasAlmostCorrect(chosenAction, correctPlayCode, altWasCorrect) {
+    function playWasAlmostCorrect(chosenAction, correctPlayCode) {
         numAlmostCorrect++;
-        const message = adjustResponse('Almost right. ', altWasCorrect) + playerCard1TextDiv.textContent
+        const message = 'Almost right. ' + playerCard1TextDiv.textContent
             + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
@@ -696,9 +717,9 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePlayResult(false, false, true, message);
     }
 
-    function playWasIncorrect(chosenAction, correctPlayCode, altWasCorrect) {
+    function playWasIncorrect(chosenAction, correctPlayCode) {
         numIncorrect++;
-        const message = adjustResponse('Oops. ', altWasCorrect) + playerCard1TextDiv.textContent
+        const message = 'Oops. ' + playerCard1TextDiv.textContent
             + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
@@ -755,9 +776,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleAction(action) {
 
-        if (altActionRequested) {
-            alt = action;
-            altActionRequested = false;
+        if (boldActionRequested) {
+            boldAction = action;
+            boldActionRequested = false;
             return;
         }
 
@@ -767,24 +788,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentOptions = getCurrentOptions();
 
-        let altCorrectPlayCode = null;
-        let altChosenAction = null;
-        let altPlayWasCorrect = null;
-        if (alt != null) {
-            altCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
-            altChosenAction = actionCodesByAction[alt];
-            altPlayWasCorrect = wasPlayCorrect(altChosenAction, altCorrectPlayCode, isHardMode);
+        let boldCorrectPlayCode = null;
+        let boldChosenAction = null;
+        let boldPlayWasCorrect = null;
+        if (boldAction == null) {
+            updateBoldPlayResult(null, null, null);
+        } else {
+            boldCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
+            boldChosenAction = actionCodesByAction[boldAction];
+            boldPlayWasCorrect = wasPlayCorrect(boldChosenAction, boldCorrectPlayCode, isHardMode);
+            updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode);
         }
 
         const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, false);
         const chosenAction = actionCodesByAction[action];
         if (wasPlayCorrect(chosenAction, correctPlayCode, isHardMode)) {
-            playWasCorrect(chosenAction, isHardMode, altPlayWasCorrect);
+            playWasCorrect(chosenAction, isHardMode);
         } else {
-            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode, altPlayWasCorrect)) {
+            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode, boldPlayWasCorrect)) {
                 playWasAlmostCorrect(chosenAction, correctPlayCode);
             } else {
-                playWasIncorrect(chosenAction, correctPlayCode, altPlayWasCorrect);
+                playWasIncorrect(chosenAction, correctPlayCode, boldPlayWasCorrect);
             }
         }
 
@@ -792,7 +816,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayCorrectPlays(currentOptions, false);
         updateButtons(currentOptions);
         deal(isHardMode);
-        alt = null;
+        boldAction = null;
     }
 
     function handleOptionChanged(event) {
@@ -820,14 +844,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentOptions = getCurrentOptions();
         updateButtons(currentOptions);
         displayCorrectPlays(currentOptions, false);
-        altActionRequested = false;
-        alt = null;
+        boldActionRequested = false;
+        boldAction = null;
     }
 
     function initialSetup() {
 
         // Initialize the play result area
-        updatePlayResult(false, false, false, '');
+        updatePlayResult(false, false, false, null, '');
+        updateBoldPlayResult(null, '');
 
         // default options
         decksSelect.value = '4,6,8-deck';
@@ -858,9 +883,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateButtons(currentOptions);
         deal(hardModeCheckbox.checked);
 
-        // alt action event handler
+        // bold-related event handlers
         dealerCardDiv.addEventListener('click', function () {
-            altActionRequested = !altActionRequested;
+            boldActionRequested = !boldActionRequested;
+        });
+        correctPlaysTitle.addEventListener('click', function () {
+            showBoldRequested = !showBoldRequested;
+            displayCorrectPlays(currentOptions, showBoldRequested);
         });
     }
 
