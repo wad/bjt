@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const surrenderPermittedCheckbox = document.getElementById('surrenderPermitted');
     const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
     const hardModeCheckbox = document.getElementById('hardMode');
+    const deepPlaysCheckbox = document.getElementById('deepPlays');
     const reverseTableCheckbox = document.getElementById('reverseTable');
     const correctPlaysTitle = document.getElementById('correctPlays');
 
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': 'Surrender (or split)'
     };
 
-    const actionCodeIsForHardMode = {
+    const actionCodeIsForDeepPlays = {
         'H ': true,
         'S ': true,
         'D ': false,
@@ -90,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': true
     };
 
-    const actionCodeIsForNonHardMode = {
+    const actionCodeIsForNormalPlays = {
         'H ': true,
         'S ': true,
         'D ': true,
@@ -285,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'cards/' + card + suite + '.png';
     }
 
-    function convertActionCodeForNonHardMode(actionCode) {
+    function convertActionCodeForNormalPlays(actionCode) {
         return actionCode[0] + ' ';
     }
 
@@ -366,15 +367,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return finalSegment;
     }
 
-    function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment, isHardMode) {
+    function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment, isDeepPlays) {
         let result = '<tr><td>' + simplifiedHand + '</td>';
         for (let i = 0; i < numCharsInSegment; i += 2) {
             const actionCode = correctPlayRowSegment[i] + correctPlayRowSegment[i + 1];
-            if (isHardMode) {
+            if (isDeepPlays) {
                 result += '<td style="' + getCellColorHtml(actionCode) + '">' + actionCode + '</td>'
             } else {
-                const nonHardModeActionCode = convertActionCodeForNonHardMode(actionCode);
-                result += '<td style="' + getCellColorHtml(nonHardModeActionCode) + '">' + nonHardModeActionCode + '</td>'
+                const normalPlaysActionCode = convertActionCodeForNormalPlays(actionCode);
+                result += '<td style="' + getCellColorHtml(normalPlaysActionCode) + '">' + normalPlaysActionCode + '</td>'
             }
         }
         return result + '</tr>';
@@ -407,14 +408,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentOptions,
                 showBold);
             if (isHandSplittable(handCards)) {
-                splitHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isHardMode);
+                splitHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isDeepPlays);
             } else {
                 if (isHandSoft(handCards)) {
-                    softHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isHardMode);
+                    softHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isDeepPlays);
                 } else {
                     let sum = sumCardValues(handCards);
                     if (!hardHandsMap.has(sum)) {
-                        hardHandsMap.set(sum, convertCorrectPlayRowForDisplay(sum, correctPlayRowSegment, currentOptions.isHardMode));
+                        hardHandsMap.set(sum, convertCorrectPlayRowForDisplay(sum, correctPlayRowSegment, currentOptions.isDeepPlays));
                     }
                 }
             }
@@ -455,8 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableKey = Object.entries(actionNamesByActionCode);
         let table = '<table border="1">';
         for (let [actionCode, actionCodeMeaning] of tableKey) {
-            const shouldShowEntry = (currentOptions.isHardMode && actionCodeIsForHardMode[actionCode])
-                || (!currentOptions.isHardMode && actionCodeIsForNonHardMode[actionCode]);
+            const shouldShowEntry = (currentOptions.isDeepPlays && actionCodeIsForDeepPlays[actionCode])
+                || (!currentOptions.isDeepPlays && actionCodeIsForNormalPlays[actionCode]);
             if (shouldShowEntry) {
                 let isSurrender = actionCode[0] === 'U';
                 if (!isSurrender || (isSurrender && currentOptions.canSur)) {
@@ -578,8 +579,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return chosenActionCode[0] === correctActionCode[0];
     }
 
-    function wasPlayCorrect(chosenActionCode, correctActionCode, isHardMode) {
-        if (!isHardMode) {
+    function wasPlayCorrect(chosenActionCode, correctActionCode, isDeepPlays) {
+        if (!isDeepPlays) {
             return wasPlayAlmostCorrect(chosenActionCode, correctActionCode);
         }
         return chosenActionCode === correctActionCode;
@@ -623,10 +624,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function playWasCorrect(chosenAction, isHardMode) {
+    function playWasCorrect(chosenAction, isDeepPlays) {
         numCorrect++;
-        if (!isHardMode) {
-            chosenAction = convertActionCodeForNonHardMode(chosenAction);
+        if (!isDeepPlays) {
+            chosenAction = convertActionCodeForNormalPlays(chosenAction);
         }
 
         const message = 'Correct! ' + playerCard1TextDiv.textContent
@@ -674,23 +675,24 @@ document.addEventListener('DOMContentLoaded', () => {
             canSur: surrenderPermittedCheckbox.checked,
             canDas: dasPermittedCheckbox.checked,
             reversed: reverseTableCheckbox.checked,
-            isHardMode: hardModeCheckbox.checked
+            isHardMode: hardModeCheckbox.checked,
+            isDeepPlays: deepPlaysCheckbox.checked
         }
     }
 
     function updateButtons(currentOptions) {
         const showSurrenderButtons = currentOptions.canSur;
-        const isHardMode = currentOptions.isHardMode;
+        const isDeepPlays = currentOptions.isDeepPlays;
 
-        doubleButton.hidden = isHardMode;
-        doubleHitButton.hidden = !isHardMode;
-        doubleStandButton.hidden = !isHardMode;
-        splitButton.hidden = isHardMode;
-        splitHitButton.hidden = !isHardMode;
-        splitStandButton.hidden = !isHardMode;
-        splitDoubleHitButton.hidden = !isHardMode;
+        doubleButton.hidden = isDeepPlays;
+        doubleHitButton.hidden = !isDeepPlays;
+        doubleStandButton.hidden = !isDeepPlays;
+        splitButton.hidden = isDeepPlays;
+        splitHitButton.hidden = !isDeepPlays;
+        splitStandButton.hidden = !isDeepPlays;
+        splitDoubleHitButton.hidden = !isDeepPlays;
 
-        if (isHardMode) {
+        if (isDeepPlays) {
             surrenderButton.hidden = true;
             surrenderHitButton.hidden = !showSurrenderButtons;
             surrenderStandButton.hidden = !showSurrenderButtons;
@@ -713,6 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
+        const isDeepPlays = deepPlaysCheckbox.checked;
         const isHardMode = hardModeCheckbox.checked;
 
         const currentOptions = getCurrentOptions();
@@ -725,14 +728,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             boldCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
             boldChosenAction = actionCodesByAction[boldAction];
-            boldPlayWasCorrect = wasPlayCorrect(boldChosenAction, boldCorrectPlayCode, isHardMode);
+            boldPlayWasCorrect = wasPlayCorrect(boldChosenAction, boldCorrectPlayCode, isDeepPlays);
             updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode);
         }
 
         const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, false);
         const chosenAction = actionCodesByAction[action];
-        if (wasPlayCorrect(chosenAction, correctPlayCode, isHardMode)) {
-            playWasCorrect(chosenAction, isHardMode);
+        if (wasPlayCorrect(chosenAction, correctPlayCode, isDeepPlays)) {
+            playWasCorrect(chosenAction, isDeepPlays);
         } else {
             if (wasPlayAlmostCorrect(chosenAction, correctPlayCode, boldPlayWasCorrect)) {
                 playWasAlmostCorrect(chosenAction, correctPlayCode);
@@ -755,18 +758,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     surrenderPermittedCheckbox.checked = false;
                 }
                 break;
-            case 'doubleAfterSplitPermitted':
-                break;
             case 'hardMode':
                 deal(hardModeCheckbox.checked);
-                break;
-            case 'reverseTable':
                 break;
             case 'decks':
                 if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
                     surrenderPermittedCheckbox.checked = false;
                 }
                 break;
+            case 'doubleAfterSplitPermitted':
+            case 'deepPlays':
+            case 'reverseTable':
             case 'soft17':
                 break;
         }
@@ -789,6 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
         surrenderPermittedCheckbox.checked = false;
         dasPermittedCheckbox.checked = true;
         hardModeCheckbox.checked = false;
+        deepPlaysCheckbox.checked = false;
         reverseTableCheckbox.checked = false;
 
         // button event handlers
@@ -803,6 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
         soft17Select.addEventListener('change', handleOptionChanged);
         surrenderPermittedCheckbox.addEventListener('change', handleOptionChanged);
         dasPermittedCheckbox.addEventListener('change', handleOptionChanged);
+        deepPlaysCheckbox.addEventListener('change', handleOptionChanged);
         hardModeCheckbox.addEventListener('change', handleOptionChanged);
         reverseTableCheckbox.addEventListener('change', handleOptionChanged);
 
