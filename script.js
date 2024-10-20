@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (isBold) {
             finalSegment = mergeSegments(
-                defaultSegment,
+                finalSegment,
                 getBoldSegment(boldPlayRow, currentOptions));
         }
         return finalSegment;
