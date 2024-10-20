@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultSuccessDiv = document.getElementById('resultSuccess');
     const resultCloseDiv = document.getElementById('resultClose');
     const resultFailureDiv = document.getElementById('resultFailure');
+    const resultBoldSuccessDiv = document.getElementById('resultBoldSuccess');
+    const resultBoldFailureDiv = document.getElementById('resultBoldFailure');
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
     const tableKeyDiv = document.getElementById('tableKey');
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
     const hardModeCheckbox = document.getElementById('hardMode');
     const reverseTableCheckbox = document.getElementById('reverseTable');
+    const correctPlaysTitle = document.getElementById('correctPlays');
 
     const doubleButton = document.getElementById('buttonDouble');
     const doubleHitButton = document.getElementById('buttonDoubleHit');
@@ -135,27 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'Up': '#85929e'
     };
 
-    const numCharsInSegment = charsPerActionCode * cards.length;
-    const numCharsInSegmentWithDivider = numCharsInSegment + 2;
-    const correctPlaySegmentOffsets = {
-        '4HUD': 0,
-        '4HUd': numCharsInSegmentWithDivider,
-        '4HuD': 2 * numCharsInSegmentWithDivider,
-        '4Hud': 3 * numCharsInSegmentWithDivider,
-        '4hUD': 4 * numCharsInSegmentWithDivider,
-        '4hUd': 5 * numCharsInSegmentWithDivider,
-        '4huD': 6 * numCharsInSegmentWithDivider,
-        '4hud': 7 * numCharsInSegmentWithDivider,
-        '2HuD': 8 * numCharsInSegmentWithDivider,
-        '2Hud': 9 * numCharsInSegmentWithDivider,
-        '2huD': 10 * numCharsInSegmentWithDivider,
-        '2hud': 11 * numCharsInSegmentWithDivider,
-        '1HuD': 12 * numCharsInSegmentWithDivider,
-        '1Hud': 13 * numCharsInSegmentWithDivider,
-        '1huD': 14 * numCharsInSegmentWithDivider,
-        '1hud': 15 * numCharsInSegmentWithDivider
-    };
-
     // The keys of this object are the two player cards, standardized, in ascending value order.
     // Each two characters in the associated strings corresponds to an action code, "--", or "..".
     // The position of these two-character codes indicates the associated dealer card, within each segment.
@@ -164,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // The value ".." (two dots) means "use the default correct play".
     // The default correct play is the first segment, the leftmost 20 characters of each string,
     // corresponding to options: 4 or more decks, H17, surrender is available, double after split is available.
-    const correctPlays = {
+    const plays = {
         //     468,H17,SUR,DS        468,H17,SUR,nDS       468,H17,nSUR,DS       468,H17,nSUR,nDS      468,S17,SUR,DS        468,S17,SUR,nDS       468,S17,nSUR,DS       468,S17,nSUR,nDS      2,H17,nSUR,DS         2,H17,nSUR,nDS        2,S17,nSUR,DS         2,S17,nSUR,nDS        1,H17,nSUR,DS         1,H17,nSUR,nDS        1,S17,nSUR,DS         1,S17,nSUR,nDS
         //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
         '22': 'PhPhPhPhPhPhH H H H --H H ................--....................--H H ................--....................--H H ................--....................--H H ................--....................--H ..................--....................--H ..................--....................--H ..................--....................--H ..................',
@@ -221,6 +203,77 @@ document.addEventListener('DOMContentLoaded', () => {
         '9A': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         'XX': 'S S S S S S S S S S --....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................',
         'AA': 'PhPhPsPsPdPhPhPhPhPh--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................--....................'
+    };
+
+    const boldPlays = {
+        //     2468,SUR              2468,nSUR             1,nSUR
+        //     2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A   2 3 4 5 6 7 8 9 X A
+        '22': '....................--....................--....................',
+        '23': '....................--....................--....................',
+        '24': '....................--....................--....................',
+        '25': '....................--....................--....................',
+        '26': '......DhDh..........--......DhDh..........--......DhDh..........',
+        '27': 'Dh........Dh........--Dh........Dh........--Dh........Dh........',
+        '28': '................DhDh--................DhDh--................DhDh',
+        '29': '..................Dh--..................Dh--..................Dh',
+        '2X': 'S S S ..............--S S S ..............--S S S S S ..........',
+        '2A': '....................--....................--....................',
+        '33': '....................--....................--....................',
+        '34': '....................--....................--....................',
+        '35': '......DhDh..........--......DhDh..........--......DhDh..........',
+        '36': 'Dh........Dh........--Dh........Dh........--Dh........Dh........',
+        '37': '................DhDh--................DhDh--................DhDh',
+        '38': '..................Dh--..................Dh--..................Dh',
+        '39': 'S S S ..............--S S S ..............--S S S S S ..........',
+        '3X': '....................--....................--S S ................',
+        '3A': '....................--....................--....................',
+        '44': '......DhDh..........--......DhDh..........--......DhDh..........',
+        '45': 'Dh........Dh........--Dh........Dh........--Dh........Dh........',
+        '46': '................DhDh--................DhDh--................DhDh',
+        '47': '..................Dh--..................Dh--..................Dh',
+        '48': 'S S S ..............--S S S ..............--S S S S S ..........',
+        '49': '....................--....................--S S ................',
+        '4X': '................Uh..--....................--....................',
+        '4A': '....................--....................--....................',
+        '55': '................DhDh--................DhDh--................DhDh',
+        '56': '..................Dh--..................Dh--..................Dh',
+        '57': 'S S S ..............--S S S ..............--S S S S S ..........',
+        '58': '....................--....................--S S ................',
+        '59': '................Uh..--....................--....................',
+        '5X': '..............UhS Uh--................S ..--................S ..',
+        '5A': '....................--....................--....................',
+        '66': 'PsPsPs..............--PsPsPs..............--PsPsPs..............',
+        '67': '....................--....................--S S ................',
+        '68': '................Uh..--....................--....................',
+        '69': '..............UhS Uh--................S ..--................S ..',
+        '6X': '................S ..--................S ..--................S ..',
+        '6A': '....................--....................--Dh..................',
+        '77': '................Uh..--....................--....................',
+        '78': '..............UhS Uh--................S ..--................S ..',
+        '79': '................S ..--................S ..--................S ..',
+        '7X': '....................--....................--....................',
+        '7A': '....................--....................--....................',
+        '88': '................Up..--....................--....................',
+        '89': '....................--....................--....................',
+        '8X': '....................--....................--....................',
+        '8A': '......DsDs..........--......DsDs..........--......DsDs..........',
+        '99': '....................--....................--....................',
+        '9X': '....................--....................--....................',
+        '9A': '....................--....................--....................',
+        'XX': '....................--....................--....................',
+        'AA': '....................--....................--....................'
+    };
+
+    const numCharsInSegment = charsPerActionCode * cards.length;
+    const segLen = numCharsInSegment + 2;
+    const playSegmentOffsets = {
+        '4HUD': 0, '4HUd': segLen, '4HuD': 2 * segLen, '4Hud': 3 * segLen,
+        '4hUD': 4 * segLen, '4hUd': 5 * segLen, '4huD': 6 * segLen, '4hud': 7 * segLen,
+        '2HuD': 8 * segLen, '2Hud': 9 * segLen, '2huD': 10 * segLen, '2hud': 11 * segLen,
+        '1HuD': 12 * segLen, '1Hud': 13 * segLen, '1huD': 14 * segLen, '1hud': 15 * segLen
+    };
+    const boldPlaySegmentOffsets = {
+        '4U': 0, '4u': segLen, '1u': 2 * segLen
     };
 
     // The position in each string corresponds to the dealer card.
@@ -294,6 +347,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let numCorrect = 0;
     let numAlmostCorrect = 0;
     let numIncorrect = 0;
+    let boldActionRequested = false;
+    let boldAction = null;
+    let showBoldRequested = false;
 
     // Returns an integer >= 0 and < max
     function getRandomInteger(max) {
@@ -352,18 +408,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return newBase;
     }
 
-    function getCorrectPlayRowSegment(correctPlayRow, currentOptions) {
+    function getBoldLookupCode(currentOptions) {
+        if (currentOptions.canSur) {
+            return '4U';
+        }
+        return currentOptions.decks === 1 ? '1u' : '4u';
+    }
+
+    function getBoldSegment(boldPlayRow, currentOptions) {
+        const segmentOffset = boldPlaySegmentOffsets[getBoldLookupCode(currentOptions)];
+        return boldPlayRow.substring(segmentOffset, segmentOffset + numCharsInSegment);
+    }
+
+    function getCorrectPlayRowSegment(correctPlayRow, boldPlayRow, currentOptions, isBold) {
         const lookupKey = '' + currentOptions.decks
             + (currentOptions.isH17 ? 'H' : 'h')
             + (currentOptions.canSur ? 'U' : 'u')
             + (currentOptions.canDas ? 'D' : 'd');
-        const segmentOffset = correctPlaySegmentOffsets[lookupKey];
-        let finalSegment = correctPlayRow.substring(0, numCharsInSegment);
+        const segmentOffset = playSegmentOffsets[lookupKey];
+        const defaultSegment = correctPlayRow.substring(0, numCharsInSegment);
+        let finalSegment;
         if (segmentOffset === 0) {
-            return finalSegment;
+            finalSegment = defaultSegment;
+        } else {
+            const specificSegment = correctPlayRow.substring(segmentOffset, segmentOffset + numCharsInSegment);
+            finalSegment = mergeSegments(defaultSegment, specificSegment);
         }
-        const specificSegment = correctPlayRow.substring(segmentOffset, segmentOffset + numCharsInSegment);
-        return mergeSegments(finalSegment, specificSegment);
+        if (isBold) {
+            finalSegment = mergeSegments(
+                finalSegment,
+                getBoldSegment(boldPlayRow, currentOptions));
+        }
+        return finalSegment;
     }
 
     function convertCorrectPlayRowForDisplay(simplifiedHand, correctPlayRowSegment, isHardMode) {
@@ -388,28 +464,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return hand[1] === 'A';
     }
 
-    function displayCorrectPlays(currentOptions) {
+    function displayCorrectPlays(currentOptions, showBold) {
         let splitHandsSection = '';
         let softHandsSection = '';
 
         // Key is the sum of the card values in the hand. Value is the displayable row of correct plays.
         let hardHandsMap = new Map();
 
-        let entries = Object.entries(correctPlays);
+        let entries = Object.entries(plays);
         if (currentOptions.reversed) {
             entries.reverse();
         }
 
         // Walk through the correct plays, and create displayable rows for the table to display.
-        for (const [hand, correctPlayRow] of entries) {
-            const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
-            if (isHandSplittable(hand)) {
-                splitHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment, currentOptions.isHardMode);
+        for (const [handCards, correctPlayRow] of entries) {
+            const correctPlayRowSegment = getCorrectPlayRowSegment(
+                correctPlayRow,
+                boldPlays[handCards],
+                currentOptions,
+                showBold);
+            if (isHandSplittable(handCards)) {
+                splitHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isHardMode);
             } else {
-                if (isHandSoft(hand)) {
-                    softHandsSection += convertCorrectPlayRowForDisplay(hand, correctPlayRowSegment, currentOptions.isHardMode);
+                if (isHandSoft(handCards)) {
+                    softHandsSection += convertCorrectPlayRowForDisplay(handCards, correctPlayRowSegment, currentOptions.isHardMode);
                 } else {
-                    let sum = sumCardValues(hand);
+                    let sum = sumCardValues(handCards);
                     if (!hardHandsMap.has(sum)) {
                         hardHandsMap.set(sum, convertCorrectPlayRowForDisplay(sum, correctPlayRowSegment, currentOptions.isHardMode));
                     }
@@ -438,6 +518,12 @@ document.addEventListener('DOMContentLoaded', () => {
         tableDiv.innerHTML = '<table border="1"><tr><td>SPLIT HANDS</td>' + dealerCardHeader + '</tr>' + splitHandsSection
             + '<tr><td style="text-align: left;">SOFT HANDS</td>' + dealerCardHeader + '</tr>' + softHandsSection
             + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
+
+        if (showBold) {
+            correctPlaysTitle.innerText = 'Bold Plays:';
+        } else {
+            correctPlaysTitle.innerText = 'Correct Plays:';
+        }
 
         showTableKey(currentOptions);
     }
@@ -556,9 +642,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return correctPlayRow[i] + correctPlayRow[i + 1];
     }
 
-    function lookupCorrectActionCode(dealerCard, hand, currentOptions) {
-        const correctPlayRow = correctPlays[hand[0] + hand[1]];
-        const correctPlayRowSegment = getCorrectPlayRowSegment(correctPlayRow, currentOptions);
+    function lookupCorrectActionCode(dealerCard, hand, currentOptions, isBold) {
+        const handCards = hand[0] + hand[1];
+        const correctPlayRowSegment = getCorrectPlayRowSegment(
+            plays[handCards],
+            boldPlays[handCards],
+            currentOptions,
+            isBold);
         return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
     }
 
@@ -589,12 +679,36 @@ document.addEventListener('DOMContentLoaded', () => {
         resultCloseDiv.style.display = wasClose ? '' : 'none';
     }
 
+    function updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode) {
+        if (boldPlayWasCorrect == null) {
+            resultBoldSuccessDiv.innerText = '';
+            resultBoldSuccessDiv.style.display = 'none';
+            resultBoldFailureDiv.innerText = '';
+            resultBoldFailureDiv.style.display = 'none';
+        } else {
+            if (boldPlayWasCorrect) {
+                resultBoldSuccessDiv.innerText = 'Bold play was correct! You chose: ' + actionNamesByActionCode[boldChosenAction];
+                resultBoldSuccessDiv.style.display = '';
+                resultBoldFailureDiv.innerText = '';
+                resultBoldFailureDiv.style.display = 'none';
+            } else {
+                resultBoldSuccessDiv.innerText = '';
+                resultBoldSuccessDiv.style.display = 'none';
+                resultBoldFailureDiv.innerText = 'Bold play was incorrect. You chose ' + actionNamesByActionCode[boldChosenAction]
+                    + ' but the correct one was ' + actionNamesByActionCode[boldCorrectPlayCode] + '.';
+                resultBoldFailureDiv.style.display = '';
+            }
+        }
+    }
+
     function playWasCorrect(chosenAction, isHardMode) {
         numCorrect++;
         if (!isHardMode) {
             chosenAction = convertActionCodeForNonHardMode(chosenAction);
         }
-        const message = 'Correct! ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+
+        const message = 'Correct! ' + playerCard1TextDiv.textContent
+            + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction] + '".';
         updatePlayResult(true, false, false, message);
@@ -602,7 +716,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playWasAlmostCorrect(chosenAction, correctPlayCode) {
         numAlmostCorrect++;
-        const message = 'Almost right. ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = 'Almost right. ' + playerCard1TextDiv.textContent
+            + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
             + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
@@ -611,7 +726,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playWasIncorrect(chosenAction, correctPlayCode) {
         numIncorrect++;
-        const message = 'Oops. ' + playerCard1TextDiv.textContent + ' and ' + playerCard2TextDiv.textContent
+        const message = 'Oops. ' + playerCard1TextDiv.textContent
+            + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
             + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
@@ -666,27 +782,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAction(action) {
+
+        if (boldActionRequested) {
+            boldAction = action;
+            boldActionRequested = false;
+            return;
+        }
+
         const dealerCard = standardizeCard(dealerCardTextDiv.textContent);
         const hand = standardizeHand([playerCard1TextDiv.textContent, playerCard2TextDiv.textContent]);
         const isHardMode = hardModeCheckbox.checked;
 
         const currentOptions = getCurrentOptions();
-        const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions);
+
+        let boldCorrectPlayCode = null;
+        let boldChosenAction = null;
+        let boldPlayWasCorrect = null;
+        if (boldAction == null) {
+            updateBoldPlayResult(null, null, null);
+        } else {
+            boldCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
+            boldChosenAction = actionCodesByAction[boldAction];
+            boldPlayWasCorrect = wasPlayCorrect(boldChosenAction, boldCorrectPlayCode, isHardMode);
+            updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode);
+        }
+
+        const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, false);
         const chosenAction = actionCodesByAction[action];
         if (wasPlayCorrect(chosenAction, correctPlayCode, isHardMode)) {
             playWasCorrect(chosenAction, isHardMode);
         } else {
-            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode)) {
+            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode, boldPlayWasCorrect)) {
                 playWasAlmostCorrect(chosenAction, correctPlayCode);
             } else {
-                playWasIncorrect(chosenAction, correctPlayCode);
+                playWasIncorrect(chosenAction, correctPlayCode, boldPlayWasCorrect);
             }
         }
 
         showScore();
-        displayCorrectPlays(currentOptions);
+        displayCorrectPlays(currentOptions, false);
         updateButtons(currentOptions);
         deal(isHardMode);
+        boldAction = null;
     }
 
     function handleOptionChanged(event) {
@@ -713,13 +850,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const currentOptions = getCurrentOptions();
         updateButtons(currentOptions);
-        displayCorrectPlays(currentOptions);
+        displayCorrectPlays(currentOptions, false);
+        boldActionRequested = false;
+        boldAction = null;
     }
 
     function initialSetup() {
 
         // Initialize the play result area
-        updatePlayResult(false, false, false, '');
+        updatePlayResult(false, false, false, null, '');
+        updateBoldPlayResult(null, '');
 
         // default options
         decksSelect.value = '4,6,8-deck';
@@ -745,11 +885,20 @@ document.addEventListener('DOMContentLoaded', () => {
         reverseTableCheckbox.addEventListener('change', handleOptionChanged);
 
         const currentOptions = getCurrentOptions();
-
         showScore();
-        displayCorrectPlays(currentOptions);
+        displayCorrectPlays(currentOptions, false);
         updateButtons(currentOptions);
         deal(hardModeCheckbox.checked);
+
+        // bold-related event handlers
+        dealerCardDiv.addEventListener('click', function () {
+            boldActionRequested = !boldActionRequested;
+        });
+        correctPlaysTitle.addEventListener('click', function () {
+            const curOpt = getCurrentOptions();
+            showBoldRequested = !showBoldRequested;
+            displayCorrectPlays(curOpt, showBoldRequested);
+        });
     }
 
     initialSetup();
