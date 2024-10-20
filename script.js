@@ -569,7 +569,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const handCards = hand[0] + hand[1];
         const correctPlayRowSegment = getCorrectPlayRowSegment(
             plays[handCards],
-            boldPlays[handCards],
             currentOptions,
             isBold);
         return getActionCodeFromCorrectPlays(correctPlayRowSegment, dealerCard);
