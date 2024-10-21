@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultCloseDiv = document.getElementById('resultClose');
     const resultFailureDiv = document.getElementById('resultFailure');
     const resultBoldSuccessDiv = document.getElementById('resultBoldSuccess');
+    const resultBoldCloseDiv = document.getElementById('resultBoldClose');
     const resultBoldFailureDiv = document.getElementById('resultBoldFailure');
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
@@ -543,6 +544,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // This method generates every possible situation, duplicating ones that should be more frequently chosen,
     // and randomly selects one from the list.
     function selectSituation(isHardMode) {
+
+        return {
+            hand: 'A8',
+            dealerCard: '5'
+        };
+
         const situationsEntries = Object.entries(situations);
         const availableSituations = [];
         for (let [handCards, frequenciesByDealerCard] of situationsEntries) {
@@ -593,17 +600,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function wasPlayAlmostCorrect(chosenActionCode, correctActionCode) {
+        // Note that this will incorrectly return true if the play is correct (instead of just almost correct).
+        // But that doesn't matter for the way it is used.
         return chosenActionCode[0] === correctActionCode[0];
     }
 
     function wasPlayCorrect(chosenActionCode, correctActionCode, isDeepPlays) {
         if (!isDeepPlays) {
+            // If we're not doing deep plays, then "almost correct" is just "correct".
             return wasPlayAlmostCorrect(chosenActionCode, correctActionCode);
         }
         return chosenActionCode === correctActionCode;
     }
 
-    function updatePlayResult(wasSuccess, wasFailure, wasClose, message) {
+    function updatePlayResult(wasSuccess, wasClose, wasFailure, message) {
         if (!wasSuccess && !wasFailure && !wasClose) {
             resultPendingDiv.style.display = '';
             resultPendingDiv.innerText = 'Click a play button, and check here for the result.';
@@ -613,27 +623,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         resultSuccessDiv.innerText = wasSuccess ? message : '';
         resultSuccessDiv.style.display = wasSuccess ? '' : 'none';
-        resultFailureDiv.innerText = wasFailure ? message : '';
-        resultFailureDiv.style.display = wasFailure ? '' : 'none';
         resultCloseDiv.innerText = wasClose ? message : '';
         resultCloseDiv.style.display = wasClose ? '' : 'none';
+        resultFailureDiv.innerText = wasFailure ? message : '';
+        resultFailureDiv.style.display = wasFailure ? '' : 'none';
     }
 
-    function updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode) {
-        if (boldPlayWasCorrect == null) {
-            resultBoldSuccessDiv.innerText = '';
-            resultBoldSuccessDiv.style.display = 'none';
+    function clearBoldPlayResult() {
+        resultBoldSuccessDiv.innerText = '';
+        resultBoldSuccessDiv.style.display = 'none';
+        resultBoldCloseDiv.innerText = '';
+        resultBoldCloseDiv.style.display = 'none';
+        resultBoldFailureDiv.innerText = '';
+        resultBoldFailureDiv.style.display = 'none';
+    }
+
+    function updateBoldPlayResult(boldPlayWasCorrect, boldPlayWasAlmostCorrect, boldChosenAction, boldCorrectPlayCode) {
+        if (boldPlayWasCorrect) {
+            resultBoldSuccessDiv.innerText = 'Bold play was correct! You chose: "' + actionNamesByActionCode[boldChosenAction] + '"';
+            resultBoldSuccessDiv.style.display = '';
+            resultBoldCloseDiv.innerText = '';
+            resultBoldCloseDiv.style.display = 'none';
             resultBoldFailureDiv.innerText = '';
             resultBoldFailureDiv.style.display = 'none';
         } else {
-            if (boldPlayWasCorrect) {
-                resultBoldSuccessDiv.innerText = 'Bold play was correct! You chose: "' + actionNamesByActionCode[boldChosenAction] + '"';
-                resultBoldSuccessDiv.style.display = '';
+            if (boldPlayWasAlmostCorrect) {
+                resultBoldSuccessDiv.innerText = '';
+                resultBoldSuccessDiv.style.display = 'none';
+                resultBoldCloseDiv.innerText = 'Bold play was almost correct. You chose "' + actionNamesByActionCode[boldChosenAction]
+                    + '" but the correct one was "' + actionNamesByActionCode[boldCorrectPlayCode] + '".';
+                resultBoldCloseDiv.style.display = '';
                 resultBoldFailureDiv.innerText = '';
                 resultBoldFailureDiv.style.display = 'none';
             } else {
                 resultBoldSuccessDiv.innerText = '';
                 resultBoldSuccessDiv.style.display = 'none';
+                resultBoldCloseDiv.innerText = '';
+                resultBoldCloseDiv.style.display = 'none';
                 resultBoldFailureDiv.innerText = 'Bold play was incorrect. You chose "' + actionNamesByActionCode[boldChosenAction]
                     + '" but the correct one was "' + actionNamesByActionCode[boldCorrectPlayCode] + '".';
                 resultBoldFailureDiv.style.display = '';
@@ -661,17 +687,21 @@ document.addEventListener('DOMContentLoaded', () => {
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
             + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
-        updatePlayResult(false, false, true, message);
+        updatePlayResult(false, true, false, message);
     }
 
-    function playWasIncorrect(chosenAction, correctPlayCode) {
+    function playWasIncorrect(chosenAction, correctPlayCode, isDeepPlays) {
         numIncorrect++;
+        if (!isDeepPlays) {
+            chosenAction = convertActionCodeForNormalPlays(chosenAction);
+            correctPlayCode = convertActionCodeForNormalPlays(correctPlayCode);
+        }
         const message = 'Oops. ' + playerCard1TextDiv.textContent
             + ' and ' + playerCard2TextDiv.textContent
             + ' versus ' + dealerCardTextDiv.textContent
             + ', you chose "' + actionNamesByActionCode[chosenAction]
             + '", but the best play was "' + actionNamesByActionCode[correctPlayCode] + '".';
-        updatePlayResult(false, true, false, message);
+        updatePlayResult(false, false, true, message);
     }
 
     function getNumDecks() {
@@ -736,16 +766,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentOptions = getCurrentOptions();
 
-        let boldCorrectPlayCode = null;
-        let boldChosenAction = null;
-        let boldPlayWasCorrect = null;
         if (boldAction == null) {
-            updateBoldPlayResult(null, null, null);
+            clearBoldPlayResult();
         } else {
-            boldCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
-            boldChosenAction = actionCodesByAction[boldAction];
-            boldPlayWasCorrect = wasPlayCorrect(boldChosenAction, boldCorrectPlayCode, isDeepPlays);
-            updateBoldPlayResult(boldPlayWasCorrect, boldChosenAction, boldCorrectPlayCode);
+            let boldCorrectPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, true);
+            let boldChosenAction = actionCodesByAction[boldAction];
+
+            if (!isDeepPlays) {
+                boldCorrectPlayCode = convertActionCodeForNormalPlays(boldCorrectPlayCode);
+                boldChosenAction = convertActionCodeForNormalPlays(boldChosenAction);
+            }
+
+            const boldPlayWasCorrect = wasPlayCorrect(boldChosenAction, boldCorrectPlayCode, isDeepPlays);
+            const boldPlayWasAlmostCorrect = wasPlayAlmostCorrect(boldChosenAction, boldCorrectPlayCode);
+            updateBoldPlayResult(boldPlayWasCorrect, boldPlayWasAlmostCorrect, boldChosenAction, boldCorrectPlayCode);
         }
 
         const correctPlayCode = lookupCorrectActionCode(dealerCard, hand, currentOptions, false);
@@ -753,10 +787,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (wasPlayCorrect(chosenAction, correctPlayCode, isDeepPlays)) {
             playWasCorrect(chosenAction, isDeepPlays);
         } else {
-            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode, boldPlayWasCorrect)) {
+            if (wasPlayAlmostCorrect(chosenAction, correctPlayCode)) {
                 playWasAlmostCorrect(chosenAction, correctPlayCode);
             } else {
-                playWasIncorrect(chosenAction, correctPlayCode, boldPlayWasCorrect);
+                playWasIncorrect(chosenAction, correctPlayCode, isDeepPlays);
             }
         }
 
@@ -800,7 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize the play result area
         updatePlayResult(false, false, false, null, '');
-        updateBoldPlayResult(null, '');
+        clearBoldPlayResult();
 
         // default options
         decks468Button.checked = true;
