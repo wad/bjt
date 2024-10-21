@@ -495,10 +495,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalPlays > 0) {
             percentCorrect = Math.floor((numCorrect / totalPlays) * 100);
         }
-        scoreDiv.innerHTML = 'SCORE: ' + percentCorrect + '%'
-            + '<br>Correct plays: ' + numCorrect
-            + '<br>Almost correct plays: ' + numAlmostCorrect
-            + '<br>Incorrect plays: ' + numIncorrect;
+        scoreDiv.innerText = 'Played ' + numCorrect + ' correctly,' +
+            ' out of ' + (numCorrect + numAlmostCorrect + numIncorrect) + ' hands.' +
+            ' Score: ' + percentCorrect + '%';
     }
 
     function convertCardForDisplay(card) {
