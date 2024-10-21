@@ -142,6 +142,21 @@ select {
     padding: 5px;
 }
 
+.radio-buttons-container {
+    display: flex;
+    align-items: center;
+}
+
+#decks label {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#soft17 label {
+    display: inline-block;
+    margin-right: 10px;
+}
+
 .container {
     display: flex;
     justify-content: center;

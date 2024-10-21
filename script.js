@@ -15,8 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const scoreDiv = document.getElementById('score');
     const tableDiv = document.getElementById('table');
     const tableKeyDiv = document.getElementById('tableKey');
-    const decksSelect = document.getElementById('decks');
-    const soft17Select = document.getElementById('soft17');
+    const decks1Button = document.querySelector('input[name="decks"][value="1-deck"]');
+    const decks2Button = document.querySelector('input[name="decks"][value="2-deck"]');
+    const decks468Button = document.querySelector('input[name="decks"][value="4,6,8-deck"]');
+    const h17Button = document.querySelector('input[name="soft17"][value="H17"]');
+    const s17Button = document.querySelector('input[name="soft17"][value="S17"]');
     const surrenderPermittedCheckbox = document.getElementById('surrenderPermitted');
     const dasPermittedCheckbox = document.getElementById('doubleAfterSplitPermitted');
     const hardModeCheckbox = document.getElementById('hardMode');
@@ -41,7 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const cards = ['2', '3', '4', '5', '6', '7', '8', '9', 'X', 'A'];
     const cardsValuedTen = ['10', 'J', 'Q', 'K'];
 
-    const cardIndexes = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, 'X': 8, '10': 8, 'J': 8, 'Q': 8, 'K': 8, 'A': 9};
+    const cardIndexes = {
+        '2': 0,
+        '3': 1,
+        '4': 2,
+        '5': 3,
+        '6': 4,
+        '7': 5,
+        '8': 6,
+        '9': 7,
+        'X': 8,
+        '10': 8,
+        'J': 8,
+        'Q': 8,
+        'K': 8,
+        'A': 9
+    };
 
     const actionCodesByAction = {
         'buttonHit': 'H ',
@@ -657,21 +675,20 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePlayResult(false, true, false, message);
     }
 
-    function getNumDecks(selectedValue) {
-        switch (selectedValue) {
-            case '1-deck':
-                return 1;
-            case '2-deck':
-                return 2;
-            case '4,6,8-deck':
-                return 4;
+    function getNumDecks() {
+        if (decks1Button.checked) {
+            return 1;
         }
+        if (decks2Button.checked) {
+            return 2;
+        }
+        return 4;
     }
 
     function getCurrentOptions() {
         return {
-            decks: getNumDecks(decksSelect.value),
-            isH17: soft17Select.value === 'H17',
+            decks: getNumDecks(),
+            isH17: h17Button.checked,
             canSur: surrenderPermittedCheckbox.checked,
             canDas: dasPermittedCheckbox.checked,
             reversed: reverseTableCheckbox.checked,
@@ -752,9 +769,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleOptionChanged(event) {
+        let numDecks = getNumDecks();
         switch (event.target.name) {
             case 'surrenderPermitted':
-                if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
+                if (numDecks < 4 && surrenderPermittedCheckbox.checked) {
                     surrenderPermittedCheckbox.checked = false;
                 }
                 break;
@@ -762,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 deal(hardModeCheckbox.checked);
                 break;
             case 'decks':
-                if ((decksSelect.value === '1-deck' || decksSelect.value === '2-deck') && surrenderPermittedCheckbox.checked) {
+                if (numDecks < 4 && surrenderPermittedCheckbox.checked) {
                     surrenderPermittedCheckbox.checked = false;
                 }
                 break;
@@ -786,8 +804,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateBoldPlayResult(null, '');
 
         // default options
-        decksSelect.value = '4,6,8-deck';
-        soft17Select.value = 'H17';
+        decks468Button.checked = true;
+        h17Button.checked = true;
         surrenderPermittedCheckbox.checked = false;
         dasPermittedCheckbox.checked = true;
         hardModeCheckbox.checked = false;
@@ -802,8 +820,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // options event handlers
-        decksSelect.addEventListener('change', handleOptionChanged);
-        soft17Select.addEventListener('change', handleOptionChanged);
+        decks1Button.addEventListener('change', handleOptionChanged);
+        decks2Button.addEventListener('change', handleOptionChanged);
+        decks468Button.addEventListener('change', handleOptionChanged);
+        h17Button.addEventListener('change', handleOptionChanged);
+        s17Button.addEventListener('change', handleOptionChanged);
         surrenderPermittedCheckbox.addEventListener('change', handleOptionChanged);
         dasPermittedCheckbox.addEventListener('change', handleOptionChanged);
         deepPlaysCheckbox.addEventListener('change', handleOptionChanged);
