@@ -544,12 +544,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // This method generates every possible situation, duplicating ones that should be more frequently chosen,
     // and randomly selects one from the list.
     function selectSituation(isHardMode) {
-
-        return {
-            hand: 'A8',
-            dealerCard: '5'
-        };
-
         const situationsEntries = Object.entries(situations);
         const availableSituations = [];
         for (let [handCards, frequenciesByDealerCard] of situationsEntries) {
