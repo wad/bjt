@@ -16,9 +16,57 @@ a:visited {
 #game {
     margin: 20px auto;
     padding: 20px;
-    background-color: #006400;
+    background-color: #005400;
     border-radius: 8px;
     width: 500px;
+}
+
+#cardsDiv {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #006400;
+    border-radius: 8px;
+    width: 460px;
+}
+
+#playsDiv {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #006400;
+    border-radius: 8px;
+    width: 460px;
+}
+
+#resultsDiv {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #006400;
+    border-radius: 8px;
+    width: 460px;
+}
+
+#scoreDiv {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #006400;
+    border-radius: 8px;
+    width: 460px;
+}
+
+#optionsDiv {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #006400;
+    border-radius: 8px;
+    width: 460px;
+}
+
+#tableDiv {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #006400;
+    border-radius: 8px;
+    width: 460px;
 }
 
 button {

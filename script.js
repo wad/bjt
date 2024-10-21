@@ -444,9 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
             + '<tdr><td style="text-align: left;">HARD HANDS</td>' + dealerCardHeader + '</tr>' + hardHandsSection + '</table>';
 
         if (showBold) {
-            correctPlaysTitle.innerText = 'Bold Plays:';
+            correctPlaysTitle.innerText = 'Statistically Correct Play Lookup Chart (lucky version)';
         } else {
-            correctPlaysTitle.innerText = 'Correct Plays:';
+            correctPlaysTitle.innerText = 'Statistically Correct Play Lookup Chart';
         }
 
         showTableKey(currentOptions);
